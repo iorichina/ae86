@@ -9,9 +9,20 @@
 
 #### 安装教程
 
+1.  esp32Camera
+* 开发板
+ESP32-CAM
+* 在目录下新建 wifi_config.h
+<pre>
+const char *sta_ssid = "dlink.7";
+const char *sta_password = "tcl639.16.7";
+</pre>
+* Board Type
+
+ESP32 Arduino -> HK ESP32-CAM-MB
+* 
 1.  xxxx
 2.  xxxx
-3.  xxxx
 
 #### 使用说明
 
