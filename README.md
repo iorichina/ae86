@@ -14,8 +14,8 @@
 ESP32-CAM
 * 在目录下新建 wifi_config.h
 <pre>
-const char *sta_ssid = "dlink.7";
-const char *sta_password = "tcl639.16.7";
+const char *sta_ssid = "******";
+const char *sta_password = "******";
 </pre>
 * Board Type
 

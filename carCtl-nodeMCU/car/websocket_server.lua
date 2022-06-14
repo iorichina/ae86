@@ -5,6 +5,12 @@ local socket_print = function(channel, str)
     print(str)
 end
 
+local websocketGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+local function acceptKey(key)
+  return string.gsub(base64(sha1.binary(key .. websocketGuid)), "\n", "")
+end
+
 do
     if nil ~= wsvr then
         wsvr:close()
@@ -53,6 +59,7 @@ do
                     local duty = pwm.getduty(right_pin)
                     socket_print(c, "start pwm " .. right_pin .. ", duty is " .. duty)
                 end
+                socket_print(c, "on connection get " .. tostring(s) .. " and setup left_pin=" .. left_pin .. ", right_pin=" .. right_pin)
             end)
             c:on("reconnection", function(_, s)
                 tm = rtctime.epoch2cal(rtctime.get())
@@ -70,10 +77,16 @@ do
                     local duty = pwm.getduty(right_pin)
                     socket_print(c, "restart pwm " .. right_pin .. ", duty is " .. duty)
                 end
+                socket_print(c, "on reconnection get " .. tostring(s) .. " and setup left_pin=" .. left_pin .. ", right_pin=" .. right_pin)
             end)
             local left_duty = 0
             local right_duty = 0
             c:on("receive", function(_, ctl)
+                -- handshake
+                if ctl contains then
+                    
+                end
+
                 tm = rtctime.epoch2cal(rtctime.get())
                 socket_print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
 
@@ -116,7 +129,7 @@ do
                 pwm.close(left_pin)
                 pwm.stop(right_pin)
                 pwm.close(right_pin)
-                print("disconnect and close pwm " .. left_pin .. " and pwm " .. right_pin)
+                print("on disconnect get" .. tostring(s) .. " and close pwm " .. left_pin .. " and pwm " .. right_pin)
             end)
         end)
 
