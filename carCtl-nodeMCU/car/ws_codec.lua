@@ -7,22 +7,6 @@ local function acceptKey(key)
     return gsub(base64(sha1.binary(key .. websocketGuid)), "\n", "")
 end
 
---[==[
-GET / HTTP/1.1
-Host: 192.168.155.254:9999
-Connection: Upgrade
-Pragma: no-cache
-Cache-Control: no-cache
-User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36
-Upgrade: websocket
-Origin: file://
-Sec-WebSocket-Version: 13
-Accept-Encoding: gzip, deflate
-Accept-Language: zh-CN,zh;q=0.9
-Sec-WebSocket-Key: OMc6Q7JAFEkiVhGPr40XmQ==
-Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
-
-]==]
 local req_sample = {
     method = "GET",
     path = "/",
@@ -106,16 +90,69 @@ local function handleHandshake(head, protocol)
         res[#res + 1] = {"Sec-WebSocket-Protocol", protocol}
     end
 
-    return res, res_prefix + accept +"\n\r\n\r"
+    return res, res_prefix + accept + "\n\r\n\r"
+end
+local function handshakeRes(req)
+    return res_prefix + acceptKey(req["Sec-WebSocket-Key"]) + "\n\r\n\r"
 end
 
+--[==[
+GET / HTTP/1.1
+Host: 192.168.155.254:9999
+Connection: Upgrade
+Pragma: no-cache
+Cache-Control: no-cache
+User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36
+Upgrade: websocket
+Origin: file://
+Sec-WebSocket-Version: 13
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Sec-WebSocket-Key: OMc6Q7JAFEkiVhGPr40XmQ==
+Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
+
+]==]
 local function handshakeRequest(reqStr)
-    
+    if string.sub(reqStr, 1, string.len("GET /")) ~= "GET /" then
+        return nil
+    end
+    local f = string.find(reqStr, "Upgrade: websocket")
+    if not f then
+        return nil
+    end
+    return parseRequest(reqStr)
 end
-
+local function parseRequest(reqStr)
+    local t = reqStr:tsplit("\n\r")
+    if not t then
+        return nil
+    end
+    local req = {}
+    local x = t[1]:tsplit(" ")
+    req.method = x[1]
+    req.path = x[2]
+    req.protocol = x[3]
+    for i = 2, #t do
+        x = t[i]:tsplit(": ")
+        if #x > 1 then
+            local tmp = string.sub(t[1], #x[1])
+            req.headers[x[1]] = tmp
+            if x[1] == "Host" then
+                local h = tmp:tsplit(":")
+                req.host = h[1]
+                if #h > 1 then
+                    req.port = tonumber(h[2])
+                end
+            end
+        end
+    end
+    return req
+end
 return {
     -- decode = decode,
     -- encode = encode,
     acceptKey = acceptKey,
-    handleHandshake = handleHandshake
+    handleHandshake = handleHandshake,
+    handshakeRequest = handshakeRequest,
+    handshakeRes = handshakeRes
 }

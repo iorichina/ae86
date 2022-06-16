@@ -1,14 +1,9 @@
+local ws_codec = require("ws_codec")
 local socket_print = function(channel, str)
     pcall(function(channel, str)
         channel:send(str)
     end, channel, str)
     print(str)
-end
-
-local websocketGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-
-local function acceptKey(key)
-  return string.gsub(base64(sha1.binary(key .. websocketGuid)), "\n", "")
 end
 
 do
@@ -83,8 +78,10 @@ do
             local right_duty = 0
             c:on("receive", function(_, ctl)
                 -- handshake
-                if ctl contains then
-                    
+                local handshake = ws_codec.handshakeRequest(ctl)
+                if handshake then
+                    c:send(ws_codec.handshakeRes(handshake))
+                    return
                 end
 
                 tm = rtctime.epoch2cal(rtctime.get())
