@@ -159,23 +159,27 @@
 		}
         function tcpSocket(url) {
             let connection = new WebSocket(url);
+            connection.onerror = function(event) {
+                console.error('WebSocket error: ', event);
+            }
             connection.onopen = function(event) {
-                console.info(event)
+                console.warn(event)
             }
             connection.onmessage = function(event) {
                 console.info(event)
             }
             connection.onclose = function() {
-                console.log("连接关闭")
+                console.warn("连接关闭")
             }
             return connection
         }
         var ws
         var timer
+        let url = 'ws://192.168.155.254:9999/'
+        url = 'ws://121.40.165.18:8800/'
 		window.onload = function() {
-            let url = 'ws://192.168.155.254:9999'
 			ws = tcpSocket(url)
-            console.log("connect to " + url)
+            console.log("connecting to " + url)
 		}
         $(".to_top").ontouchstart = function(evt) {
             if (ws.readyState == 1) {

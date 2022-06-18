@@ -1,91 +1,65 @@
 local ws_codec = require("ws_codec")
-local socket_print = function(channel, str)
-    pcall(function(channel, str)
-        channel:send(str)
-    end, channel, str)
-    print(str)
-end
 
 do
     if nil ~= wsvr then
         wsvr:close()
         wsvr = nil
     end
-    print("check wsvr:" .. tostring(wsvr) .. ", ip:" .. tostring(wifi.sta.getip()))
+    applog.print("check wsvr:" .. tostring(wsvr) .. ", ip:" .. tostring(wifi.sta.getip()))
     if not wsvr and wifi.sta.status() == wifi.STA_GOTIP then
-        print("opening web socket server")
-
-        local tm = rtctime.epoch2cal(rtctime.get())
-        print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+        applog.print("opening web socket server")
 
         local left_pin = 5
         pwm.stop(left_pin)
         pwm.close(left_pin)
+        applog.print("ws config left_pin:", left_pin)
 
         local right_pin = 6
         pwm.stop(right_pin)
         pwm.close(right_pin)
+        applog.print("ws config right_pin:", left_pin)
 
         local ip = wifi.sta.getip()
-        print("local ip:" .. ip)
+        applog.print("ws local ip:", ip)
 
         wsvr = net.createServer(net.TCP, 120)
-        local global_c = nil
         local port = 9999
-        print("listen to port " .. tostring(port))
-        wsvr:listen(port, function(c)
-            if global_c ~= nil then
-                global_c:close()
-            end
-            global_c = c
-            c:on("connection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(c, string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+        applog.print("ws listen to port ", port)
+        wsvr:listen(port, function(ws)
+            ws:on("connection", function(c, s)
+                applog.print(c, "on connection~", s)
 
                 do
                     pwm.setup(left_pin, 500, 0)
                     pwm.start(left_pin)
                     local duty = pwm.getduty(left_pin)
-                    socket_print(c, "start pwm " .. left_pin .. ", duty is " .. duty)
+                    applog.print(c, "start pwm left_pin:", left_pin, ", duty is ", duty)
                 end
                 do
                     pwm.setup(right_pin, 500, 0)
                     pwm.start(right_pin)
                     local duty = pwm.getduty(right_pin)
-                    socket_print(c, "start pwm " .. right_pin .. ", duty is " .. duty)
+                    applog.print(c, "start pwm right_pin:", right_pin, ", duty is ", duty)
                 end
-                socket_print(c, "on connection get " .. tostring(s) .. " and setup left_pin=" .. left_pin .. ", right_pin=" .. right_pin)
-            end)
-            c:on("reconnection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
-
-                do
-                    pwm.setup(left_pin, 500, 0)
-                    pwm.start(left_pin)
-                    local duty = pwm.getduty(left_pin)
-                    socket_print(c, "restart pwm " .. left_pin .. ", duty is " .. duty)
-                end
-                do
-                    pwm.setup(right_pin, 500, 0)
-                    pwm.start(right_pin)
-                    local duty = pwm.getduty(right_pin)
-                    socket_print(c, "restart pwm " .. right_pin .. ", duty is " .. duty)
-                end
-                socket_print(c, "on reconnection get " .. tostring(s) .. " and setup left_pin=" .. left_pin .. ", right_pin=" .. right_pin)
             end)
             local left_duty = 0
             local right_duty = 0
-            c:on("receive", function(_, ctl)
+            ws:on("receive", function(c, ctl)
+                applog.print(c, "on receive~", ctl)
+
                 -- handshake
                 local handshake = ws_codec.handshakeRequest(ctl)
                 if handshake then
-                    c:send(ws_codec.handshakeRes(handshake))
+                    local _, json = pcall(sjson.encode, handshake)
+                    applog.print(c, "handshake request:", json)
+
+                    local res = ws_codec.handshakeRes(handshake)
+                    local _, json = pcall(sjson.encode, handshake)
+                    applog.print(c, "handshake response:", res)
+
+                    c:send(res)
                     return
                 end
-
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
 
                 if ctl == "ping" then
                     c:send("pong")
@@ -114,26 +88,24 @@ do
                 if right_duty > 1023 then
                     right_duty = 1023
                 end
-                socket_print(c, "get " .. ctl .. " and set left_duty=" .. left_duty .. ", right_duty=" .. right_duty)
+
+                applog.print(c, "set left_duty=", left_duty, ", right_duty=", right_duty)
                 pwm.setduty(left_pin, left_duty)
                 pwm.setduty(right_pin, right_duty)
             end)
-            c:on("disconnection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+            ws:on("disconnection", function(c, s)
+                applog.print("on disconnect~", s)
 
                 pwm.stop(left_pin)
                 pwm.close(left_pin)
                 pwm.stop(right_pin)
                 pwm.close(right_pin)
-                print("on disconnect get" .. tostring(s) .. " and close pwm " .. left_pin .. " and pwm " .. right_pin)
+                applog.print("on disconnect close pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
             end)
         end)
 
-        if wsvr then
-            local ppp, ipp = wsvr:getaddr()
-            print("tcp server on " .. tostring(ipp) .. ":" .. tostring(ppp))
-        end
+        local ppp, ipp = wsvr:getaddr()
+        applog.print("ws server on ws://", ipp, ":", ppp, "/")
 
     end
 end

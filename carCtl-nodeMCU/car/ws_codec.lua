@@ -1,10 +1,11 @@
+local string_utils = require("string_utils")
 local gmatch = string.gmatch
 local lower = string.lower
 local gsub = string.gsub
 local websocketGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 local function acceptKey(key)
-    return gsub(base64(sha1.binary(key .. websocketGuid)), "\n", "")
+    return gsub(encoder.toBase64(crypto.hash("sha1", key .. websocketGuid)), "\n", "")
 end
 
 local req_sample = {
@@ -16,84 +17,30 @@ local req_sample = {
     {"Connection", "Upgrade"},
     {"Upgrade", "websocket"},
     {"Sec-WebSocket-Version", "13"},
-    {"Sec-WebSocket-Key", "kMgvb6KivsYVl2EHinJHZg=="}
+    {"Sec-WebSocket-Key", "OMc6Q7JAFEkiVhGPr40XmQ=="}
 }
 local res_sample = [==[
 HTTP/1.1 101 Switching Protocols
-Connection: upgrade
 Upgrade: websocket
-Sec-WebSocket-Accept: xBe0pH4Tv71faNfPxaMMlkSruJU=
+Connection: Upgrade
+Sec-WebSocket-Accept: /gsA7NI7lNULVWN5OtqsF4di2Kk=
 
 ]==]
 
-local res_prefix = [==[
-HTTP/1.1 101 Switching Protocols
-Connection: upgrade
-Upgrade: websocket
-Sec-WebSocket-Accept: ]==]
+local res_prefix = "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Accept: "
 
-local function handleHandshake(head, protocol)
-
-    -- WebSocket connections must be GET requests
-    if not head.method == "GET" then
-        return
-    end
-
-    -- Parse the headers for quick reading
-    local headers = {}
-    for i = 1, #head do
-        local name, value = unpack(head[i])
-        headers[lower(name)] = value
-    end
-
-    -- Must have 'Upgrade: websocket' and 'Connection: Upgrade' headers
-    if not (headers.connection and headers.upgrade and headers.connection:lower():find("upgrade", 1, true) and headers.upgrade:lower():find("websocket", 1, true)) then
-        return
-    end
-
-    -- Make sure it's a new client speaking v13 of the protocol
-    -- if tonumber(headers["sec-websocket-version"]) < 13 then
-    --     return nil, "only websocket protocol v13 supported"
-    -- end
-
-    local key = headers["sec-websocket-key"]
-    if not key then
-        return nil, "websocket security key missing"
-    end
-
-    -- If the server wants a specified protocol, check for it.
-    if protocol then
-        local foundProtocol = false
-        local list = headers["sec-websocket-protocol"]
-        if list then
-            for item in gmatch(list, "[^, ]+") do
-                if item == protocol then
-                    foundProtocol = true
-                    break
-                end
-            end
-        end
-        if not foundProtocol then
-            return nil, "specified protocol missing in request"
-        end
-    end
-
-    local accept = acceptKey(key)
-
-    local res = {
-        code = 101,
-        {"Upgrade", "websocket"},
-        {"Connection", "Upgrade"},
-        {"Sec-WebSocket-Accept", accept}
-    }
-    if protocol then
-        res[#res + 1] = {"Sec-WebSocket-Protocol", protocol}
-    end
-
-    return res, res_prefix + accept + "\n\r\n\r"
-end
 local function handshakeRes(req)
-    return res_prefix + acceptKey(req["Sec-WebSocket-Key"]) + "\n\r\n\r"
+    local ok, json = pcall(sjson.encode, req)
+    print(json)
+    print(req["host"])
+    print(req.headers["Sec-WebSocket-Key"])
+    local accept = acceptKey(req.headers["Sec-WebSocket-Key"])
+    print("accept:" .. accept)
+    local ress = res_prefix .. accept .. "\r\n"
+    -- if req.headers["Sec-WebSocket-Extensions"] then
+    --     ress = ress .. "Sec-WebSocket-Extensions: " .. req.headers["Sec-WebSocket-Extensions"] .. "\r\n"
+    -- end
+    return  ress .. "\r\n"
 end
 
 --[==[
@@ -112,6 +59,40 @@ Sec-WebSocket-Key: OMc6Q7JAFEkiVhGPr40XmQ==
 Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
 
 ]==]
+local function parseRequest(reqStr)
+    local t = string_utils.tsplit(reqStr, "\r\n")
+    if not t then
+        return nil
+    end
+    print("tsplit:" .. table.concat(t, "&&&\n"))
+    print()
+    print()
+    local req = {}
+    local x = string_utils.tsplit(t[1], " ")
+    req.method = x[1]
+    req.path = x[2]
+    req.protocol = x[3]
+    print("req1:" .. table.concat(x, "==="))
+    req.headers = {}
+    for i = 2, #t do
+        x = string_utils.tsplit(t[i], ": ")
+        print("req" .. tostring(i) .. ":" .. table.concat(x, "==="))
+        if #x > 1 then
+            local tmp = string.sub(t[i], string.len(x[1]) + 3)
+            req.headers[x[1]] = tmp
+            if x[1] == "Host" then
+                local h = string_utils.tsplit(tmp, ":")
+                req.host = h[1]
+                if #h > 1 then
+                    req.port = tonumber(h[2])
+                end
+            end
+        end
+    end
+    local ok, json = pcall(sjson.encode, req)
+    print(json)
+    return req
+end
 local function handshakeRequest(reqStr)
     if string.sub(reqStr, 1, string.len("GET /")) ~= "GET /" then
         return nil
@@ -122,37 +103,8 @@ local function handshakeRequest(reqStr)
     end
     return parseRequest(reqStr)
 end
-local function parseRequest(reqStr)
-    local t = reqStr:tsplit("\n\r")
-    if not t then
-        return nil
-    end
-    local req = {}
-    local x = t[1]:tsplit(" ")
-    req.method = x[1]
-    req.path = x[2]
-    req.protocol = x[3]
-    for i = 2, #t do
-        x = t[i]:tsplit(": ")
-        if #x > 1 then
-            local tmp = string.sub(t[1], #x[1])
-            req.headers[x[1]] = tmp
-            if x[1] == "Host" then
-                local h = tmp:tsplit(":")
-                req.host = h[1]
-                if #h > 1 then
-                    req.port = tonumber(h[2])
-                end
-            end
-        end
-    end
-    return req
-end
 return {
-    -- decode = decode,
-    -- encode = encode,
     acceptKey = acceptKey,
-    handleHandshake = handleHandshake,
     handshakeRequest = handshakeRequest,
     handshakeRes = handshakeRes
 }
