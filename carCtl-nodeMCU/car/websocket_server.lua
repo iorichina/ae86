@@ -27,7 +27,7 @@ do
         applog.print("ws listen to port ", port)
         wsvr:listen(port, function(ws)
             ws:on("connection", function(c, s)
-                applog.print(c, "on connection~", s)
+                applog.print(c, "on ws connection~", s)
 
                 do
                     pwm.setup(left_pin, 500, 0)
@@ -45,24 +45,32 @@ do
             local left_duty = 0
             local right_duty = 0
             ws:on("receive", function(c, ctl)
-                applog.print(c, "on receive~", ctl)
-
                 -- handshake
                 local handshake = ws_codec.handshakeRequest(ctl)
                 if handshake then
+                    -- applog.print(c, "on ws receive~", ctl)
                     local _, json = pcall(sjson.encode, handshake)
-                    applog.print(c, "handshake request:", json)
+                    -- applog.print(c, "ws handshake request:", json)
 
                     local res = ws_codec.handshakeRes(handshake)
                     local _, json = pcall(sjson.encode, handshake)
-                    applog.print(c, "handshake response:", res)
+                    -- applog.print(c, "ws handshake response:", res)
 
                     c:send(res)
                     return
                 end
 
+                ctl = ws_codec.decode(ctl)
+                if type(ctl) == "table" then
+                    applog.print(c, "on ws receive~", ctl.payload)
+                    ctl = ctl.payload
+                else
+                    applog.print(c, "on ws receive~", type(ctl), "=", ctl)
+                    ctl = tostring(ctl)
+                end
+
                 if ctl == "ping" then
-                    c:send("pong")
+                    c:send(ws_codec.encode("pong"))
                     return
                 elseif ctl == "go" then
                     if left_duty < 900 then
@@ -89,23 +97,23 @@ do
                     right_duty = 1023
                 end
 
-                applog.print(c, "set left_duty=", left_duty, ", right_duty=", right_duty)
+                applog.channel_print(c, ws_codec.encode, "set left_duty=", left_duty, ", right_duty=", right_duty)
                 pwm.setduty(left_pin, left_duty)
                 pwm.setduty(right_pin, right_duty)
             end)
             ws:on("disconnection", function(c, s)
-                applog.print("on disconnect~", s)
+                applog.print("on ws disconnect~", s)
 
                 pwm.stop(left_pin)
                 pwm.close(left_pin)
                 pwm.stop(right_pin)
                 pwm.close(right_pin)
-                applog.print("on disconnect close pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
+                applog.print("on ws disconnect close pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
             end)
         end)
 
         local ppp, ipp = wsvr:getaddr()
-        applog.print("ws server on ws://", ipp, ":", ppp, "/")
+        applog.print("ws server on ws://" .. ipp .. ":" .. ppp .. "/")
 
     end
 end

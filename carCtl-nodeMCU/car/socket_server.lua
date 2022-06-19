@@ -1,21 +1,11 @@
-local socket_print = function(channel, str)
-    pcall(function(channel, str)
-        channel:send(str)
-    end, channel, str)
-    print(str)
-end
-
 do
     if nil ~= svr then
         svr:close()
         svr = nil
     end
-    print("check svr:" .. tostring(svr) .. ", ip:" .. tostring(wifi.sta.getip()))
+    applog.print("check svr:" .. tostring(svr) .. ", ip:" .. tostring(wifi.sta.getip()))
     if not svr and wifi.sta.status() == wifi.STA_GOTIP then
-        print("opening tcp socket server")
-
-        local tm = rtctime.epoch2cal(rtctime.get())
-        print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+        applog.print("opening tcp socket server")
 
         local left_pin = 5
         pwm.stop(left_pin)
@@ -26,56 +16,32 @@ do
         pwm.close(right_pin)
 
         local ip = wifi.sta.getip()
-        print("local ip:" .. ip)
+        applog.print("local ip:" .. ip)
 
         svr = net.createServer(net.TCP, 120)
-        local global_c = nil
         local port = 8080
-        print("listen to port " .. tostring(port))
-        svr:listen(port, function(c)
-            if global_c ~= nil then
-                global_c:close()
-            end
-            global_c = c
-            c:on("connection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(c, string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+        applog.print("listen to port " .. tostring(port))
+        svr:listen(port, function(ts)
+            ts:on("connection", function(c, s)
+                applog.print(c, "on connection~")
 
                 do
                     pwm.setup(left_pin, 500, 0)
                     pwm.start(left_pin)
                     local duty = pwm.getduty(left_pin)
-                    socket_print(c, "start pwm " .. left_pin .. ", duty is " .. duty)
+                    applog.print(c, "start pwm " .. left_pin .. ", duty is " .. duty)
                 end
                 do
                     pwm.setup(right_pin, 500, 0)
                     pwm.start(right_pin)
                     local duty = pwm.getduty(right_pin)
-                    socket_print(c, "start pwm " .. right_pin .. ", duty is " .. duty)
-                end
-            end)
-            c:on("reconnection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
-
-                do
-                    pwm.setup(left_pin, 500, 0)
-                    pwm.start(left_pin)
-                    local duty = pwm.getduty(left_pin)
-                    socket_print(c, "restart pwm " .. left_pin .. ", duty is " .. duty)
-                end
-                do
-                    pwm.setup(right_pin, 500, 0)
-                    pwm.start(right_pin)
-                    local duty = pwm.getduty(right_pin)
-                    socket_print(c, "restart pwm " .. right_pin .. ", duty is " .. duty)
+                    applog.print(c, "start pwm " .. right_pin .. ", duty is " .. duty)
                 end
             end)
             local left_duty = 0
             local right_duty = 0
-            c:on("receive", function(_, ctl)
-                tm = rtctime.epoch2cal(rtctime.get())
-                socket_print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+            ts:on("receive", function(c, ctl)
+                applog.print(c, "on receive~", ctl)
 
                 if ctl == "ping" then
                     c:send("pong")
@@ -104,25 +70,24 @@ do
                 if right_duty > 1023 then
                     right_duty = 1023
                 end
-                socket_print(c, "get " .. ctl .. " and set left_duty=" .. left_duty .. ", right_duty=" .. right_duty)
+                applog.channel_print(c, "get " .. ctl .. " and set left_duty=" .. left_duty .. ", right_duty=" .. right_duty)
                 pwm.setduty(left_pin, left_duty)
                 pwm.setduty(right_pin, right_duty)
             end)
-            c:on("disconnection", function(_, s)
-                tm = rtctime.epoch2cal(rtctime.get())
-                print(string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"]))
+            ts:on("disconnection", function(c, s)
+                applog.print(c, "on disconnect~", s)
 
                 pwm.stop(left_pin)
                 pwm.close(left_pin)
                 pwm.stop(right_pin)
                 pwm.close(right_pin)
-                print("disconnect and close pwm " .. left_pin .. " and pwm " .. right_pin)
+                applog.print(c, "close pwm " .. left_pin .. " and pwm " .. right_pin)
             end)
         end)
 
         if svr then
             local ppp, ipp = svr:getaddr()
-            print("tcp server on " .. tostring(ipp) .. ":" .. tostring(ppp))
+            applog.print("tcp server on " .. tostring(ipp) .. ":" .. tostring(ppp))
         end
 
     end

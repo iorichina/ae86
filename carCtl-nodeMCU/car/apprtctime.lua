@@ -1,7 +1,19 @@
 local M, module = {}, ...
 _G[module] = M
 
-sntp.sync(nil, nil, nil, true)
+if not package.loaded[module] then
+    print("load", module)
+    sntp.sync(nil, nil, nil, true)
+else
+    print("dup load", module)
+end
+
+M.hmsm = function()
+    local sec, usec, _ = rtctime.get()
+    local tm = rtctime.epoch2cal(sec)
+    local ymd = (string.format("%02d:%02d:%02d.%03d", tm["hour"], tm["min"], tm["sec"], usec / 1000))
+    return ymd
+end
 
 M.ymdhmsm = function()
     local sec, usec, _ = rtctime.get()

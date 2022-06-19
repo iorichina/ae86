@@ -1,5 +1,5 @@
-require("rtctime_utils")
-require("string_utils")
+require("apprtctime")
+require("appstring")
 require("applog")
 
 applog.print("init")

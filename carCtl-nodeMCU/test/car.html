@@ -175,52 +175,64 @@
         }
         var ws
         var timer
-        let url = 'ws://192.168.155.254:9999/'
+        var timeout
+        var url
         url = 'ws://121.40.165.18:8800/'
+        url = 'ws://192.168.155.254:9999/'
 		window.onload = function() {
 			ws = tcpSocket(url)
             console.log("connecting to " + url)
 		}
+        let intervalMillis = 1000
         $(".to_top").ontouchstart = function(evt) {
             if (ws.readyState == 1) {
+                clearTimeout(timeout)
                 ws.send("go")
                 console.log("go")
-                timer = setInterval(function(){ws.send("go");console.log("go");}, 50);
+                timer = setInterval(function(){ws.send("go");console.log("go");}, intervalMillis);
             }
         }
         $(".to_top").ontouchend = function(evt) {
             if (ws.readyState == 1) {
-                ws.send("stop")
-                console.warn("stop")
-                clearInterval(timer)
+                timeout = setTimeout(function(){
+                    ws.send("stop")
+                    console.warn("stop")
+                    clearInterval(timer)
+                }, 1500)
             }
         }
         $(".to_left").ontouchstart = function(evt) {
             if (ws.readyState == 1) {
+                clearTimeout(timeout)
                 ws.send("left")
                 console.log("left")
-                timer = setInterval(function(){ws.send("left");console.log("left");}, 50);
+                timer = setInterval(function(){ws.send("left");console.log("left");}, intervalMillis);
             }
         }
         $(".to_left").ontouchend = function(evt) {
             if (ws.readyState == 1) {
-                ws.send("stop")
-                console.warn("stop")
-                clearInterval(timer)
+                timeout = setTimeout(function(){
+                    ws.send("stop")
+                    console.warn("stop")
+                    clearInterval(timer)
+                }, 1500)
             }
         }
         $(".to_right").ontouchstart = function(evt) {
             if (ws.readyState == 1) {
+                clearTimeout(timeout)
                 ws.send("right")
                 console.log("right")
-                timer = setInterval(function(){ws.send("right");console.log("right");}, 50);
+                timer = setInterval(function(){ws.send("right");console.log("right");}, intervalMillis);
             }
         }
         $(".to_right").ontouchend = function(evt) {
             if (ws.readyState == 1) {
-                ws.send("stop")
-                console.warn("stop")
-                clearInterval(timer)
+                timeout = setTimeout(function(){
+                    ws.send("stop")
+                    console.warn("stop")
+                    clearInterval(timer)
+                }, 1500)
             }
         }
   </script>

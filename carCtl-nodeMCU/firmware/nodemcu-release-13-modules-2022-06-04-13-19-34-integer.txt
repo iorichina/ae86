@@ -1,1 +1,0 @@
-modules: enduser_setup, file, gpio, net, node, pwm, rtctime, sjson, sntp, tmr, uart, websocket, wifi.

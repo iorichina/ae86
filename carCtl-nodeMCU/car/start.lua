@@ -88,6 +88,6 @@ end
 do
     enduser_setup.start()
 
-    applog.applog.print("start_websocket_server")
+    applog.print("start_websocket_server")
     start_websocket_server()
 end
