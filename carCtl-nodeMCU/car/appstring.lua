@@ -1,5 +1,6 @@
 local M, module = {}, ...
 _G[module] = M
+package.loaded[module] = M
 
 M.fsplit = function(s, sep, plain)
     local start = 1

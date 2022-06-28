@@ -1,3 +1,6 @@
+require("net")
+require("pwm")
+require("wifi")
 do
     if nil ~= svr then
         svr:close()

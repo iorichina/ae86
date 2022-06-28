@@ -1,12 +1,8 @@
+require("sntp")
+require("rtctime")
 local M, module = {}, ...
 _G[module] = M
-
-if not package.loaded[module] then
-    print("load", module)
-    sntp.sync(nil, nil, nil, true)
-else
-    print("dup load", module)
-end
+package.loaded[module] = M
 
 M.hmsm = function()
     local sec, usec, _ = rtctime.get()

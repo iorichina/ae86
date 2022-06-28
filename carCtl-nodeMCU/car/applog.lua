@@ -1,9 +1,7 @@
+require("apprtctime")
 local M, module = {}, ...
 _G[module] = M
-
-if not package.loaded[module] then
-    require("apprtctime")
-end
+package.loaded[module] = M
 
 M.print = function(...)
     for i = 1, #arg, 1 do

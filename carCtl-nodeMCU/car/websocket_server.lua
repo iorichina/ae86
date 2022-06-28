@@ -1,62 +1,95 @@
-local ws_codec = require("ws_codec")
-
+require("net")
+require("pwm")
+require("wifi")
+require("tmr")
 do
     if nil ~= wsvr then
-        wsvr:close()
-        wsvr = nil
+        return wsvr
     end
     applog.print("check wsvr:" .. tostring(wsvr) .. ", ip:" .. tostring(wifi.sta.getip()))
     if not wsvr and wifi.sta.status() == wifi.STA_GOTIP then
-        applog.print("opening web socket server")
+        local ws_codec = require("ws_codec")
+        local function handleHttp(req)
+            if not string.find(req, " HTTP/") then
+                return nil
+            end
+            return "HTTP/1.1 403 Forbidden\r\n\r\n" .. "<strong>http request not allow</strong><pre>" .. req .. "</pre>"
+        end
 
         local left_pin = 5
-        pwm.stop(left_pin)
-        pwm.close(left_pin)
-        applog.print("ws config left_pin:", left_pin)
+        local left_duty = 0
+        pwm.setup(left_pin, 1000, left_duty)
 
         local right_pin = 6
-        pwm.stop(right_pin)
-        pwm.close(right_pin)
-        applog.print("ws config right_pin:", left_pin)
+        local right_duty = 0
+        pwm.setup(right_pin, 1000, right_duty)
+
+        local function startPwm()
+            pwm.start(left_pin)
+            pwm.setduty(left_pin, left_duty)
+            applog.print("start pwm left_pin:", left_pin, ", duty is ", left_duty)
+
+            pwm.start(right_pin)
+            pwm.setduty(right_pin, right_duty)
+            applog.print("start pwm right_pin:", right_pin, ", duty is ", right_duty)
+        end
+
+        local function stopPwm()
+            left_duty = 0
+            right_duty = 0
+            pwm.stop(left_pin)
+            pwm.stop(right_pin)
+            applog.print("stop pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
+        end
+
+        local autoHandling = false
+        local autoTmr = tmr.create()
+        autoTmr:register(2000, tmr.ALARM_AUTO, function(t)
+            if autoHandling then
+                autoHandling = false
+                startPwm()
+                return
+            end
+            autoHandling = false
+            stopPwm()
+            t:stop()
+        end)
+        local function autoPwm()
+            autoHandling = true
+            autoTmr:start(true)
+        end
 
         local ip = wifi.sta.getip()
-        applog.print("ws local ip:", ip)
+        applog.print("local ip:", ip)
 
         wsvr = net.createServer(net.TCP, 120)
         local port = 9999
-        applog.print("ws listen to port ", port)
+        applog.print("websocket: listening to port ", port)
         wsvr:listen(port, function(ws)
             ws:on("connection", function(c, s)
                 applog.print(c, "on ws connection~", s)
-
-                do
-                    pwm.setup(left_pin, 500, 0)
-                    pwm.start(left_pin)
-                    local duty = pwm.getduty(left_pin)
-                    applog.print(c, "start pwm left_pin:", left_pin, ", duty is ", duty)
-                end
-                do
-                    pwm.setup(right_pin, 500, 0)
-                    pwm.start(right_pin)
-                    local duty = pwm.getduty(right_pin)
-                    applog.print(c, "start pwm right_pin:", right_pin, ", duty is ", duty)
-                end
             end)
-            local left_duty = 0
-            local right_duty = 0
             ws:on("receive", function(c, ctl)
                 -- handshake
                 local handshake = ws_codec.handshakeRequest(ctl)
                 if handshake then
-                    -- applog.print(c, "on ws receive~", ctl)
+                    applog.print(c, "on ws receive~", ctl)
                     local _, json = pcall(sjson.encode, handshake)
-                    -- applog.print(c, "ws handshake request:", json)
+                    applog.print(c, "ws handshake request:", json)
 
                     local res = ws_codec.handshakeRes(handshake)
                     local _, json = pcall(sjson.encode, handshake)
-                    -- applog.print(c, "ws handshake response:", res)
+                    applog.print(c, "ws handshake response:", res)
 
                     c:send(res)
+                    return
+                end
+                -- http request
+                local httpres = handleHttp(ctl)
+                if httpres then
+                    applog.print(c, "ws handleHttp response:", httpres)
+                    c:send(httpres)
+                    c:close()
                     return
                 end
 
@@ -97,18 +130,15 @@ do
                     right_duty = 1023
                 end
 
-                applog.channel_print(c, ws_codec.encode, "set left_duty=", left_duty, ", right_duty=", right_duty)
-                pwm.setduty(left_pin, left_duty)
-                pwm.setduty(right_pin, right_duty)
+                autoPwm()
             end)
             ws:on("disconnection", function(c, s)
-                applog.print("on ws disconnect~", s)
-
-                pwm.stop(left_pin)
-                pwm.close(left_pin)
-                pwm.stop(right_pin)
-                pwm.close(right_pin)
-                applog.print("on ws disconnect close pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
+                applog.print(c, "on ws disconnect~", s)
+                c:on("connection", nil)
+                c:on("receive", nil)
+                c:on("disconnection", nil)
+                c = nil
+                collectgarbage("collect")
             end)
         end)
 
