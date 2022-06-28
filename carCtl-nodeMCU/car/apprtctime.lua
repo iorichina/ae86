@@ -3,6 +3,7 @@ require("rtctime")
 local M, module = {}, ...
 _G[module] = M
 package.loaded[module] = M
+sntp.sync(nil, nil, nil, 1)
 
 M.hmsm = function()
     local sec, usec, _ = rtctime.get()
