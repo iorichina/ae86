@@ -2,8 +2,9 @@ require("net")
 require("pwm")
 require("wifi")
 require("tmr")
-do
+local start = function(t)
     if nil ~= wsvr then
+        t:unregister()
         return wsvr
     end
     applog.print("check wsvr:" .. tostring(wsvr) .. ", ip:" .. tostring(wifi.sta.getip()))
@@ -42,21 +43,14 @@ do
             applog.print("stop pwm left_pin:", left_pin, " and pwm right_pin:", right_pin)
         end
 
-        local autoHandling = false
         local autoTmr = tmr.create()
-        autoTmr:register(2000, tmr.ALARM_AUTO, function(t)
-            if autoHandling then
-                autoHandling = false
-                startPwm()
-                return
-            end
-            autoHandling = false
+        autoTmr:register(2000, tmr.ALARM_SEMI, function(t)
             stopPwm()
             t:stop()
         end)
         local function autoPwm()
-            autoHandling = true
             autoTmr:start(true)
+            startPwm()
         end
 
         local ip = wifi.sta.getip()
@@ -105,14 +99,6 @@ do
                 if ctl == "ping" then
                     c:send(ws_codec.encode("pong"))
                     return
-                elseif ctl == "go" then
-                    if left_duty < 900 then
-                        left_duty = 900
-                        right_duty = 900
-                    else
-                        left_duty = left_duty + 10
-                        right_duty = right_duty + 10
-                    end
                 elseif ctl == "left" then
                     left_duty = 512
                     right_duty = 1023
@@ -122,6 +108,35 @@ do
                 elseif ctl == "stop" then
                     left_duty = 0
                     right_duty = 0
+                elseif ctl == "go" then
+                    if left_duty < 900 then
+                        left_duty = 900
+                        right_duty = 900
+                    else
+                        left_duty = left_duty + 10
+                        right_duty = right_duty + 10
+                    end
+                elseif string.sub(ctl, 1, 3) == "go_" then
+                    local t = appstring.tsplit(ctl, "_") -- go_{shift}_{turn}
+                    if not t then
+                        return
+                    end
+                    local shift = tonumber(t[2])
+                    local turn = tonumber(t[3])
+                    if turn > 0 then
+                        left_duty = turn
+                    elseif turn < 0 then
+                        right_duty = -turn
+                    elseif shift > 0 then
+                        left_duty = shift
+                        right_duty = shift
+                    elseif shift < 0 then
+                        left_duty = -shift
+                        right_duty = -shift
+                    else
+                        left_duty = 0
+                        right_duty = 0
+                    end
                 end
                 if left_duty > 1023 then
                     left_duty = 1023
@@ -146,5 +161,9 @@ do
         applog.print("ws server on ws://" .. ipp .. ":" .. ppp .. "/")
 
     end
+    return wsvr
 end
-return wsvr
+
+local mytimer = tmr.create()
+mytimer:register(2000, tmr.ALARM_AUTO, start)
+mytimer:start()
