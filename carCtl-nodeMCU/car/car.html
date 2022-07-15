@@ -1,0 +1,422 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>小车控制</title>
+
+    <style type=text/css>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: sans-serif;
+            text-align: center;
+            background: #444d44;
+        }
+
+        #content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            /* width: 320px; */
+            /* height: 480px; */
+            margin: auto;
+        }
+    </style>
+    <style type="text/css">
+        #vvv {
+            margin: auto;
+        }
+
+        .box {
+            /* width: 400px; */
+            /* height: 100px; */
+            text-align: center;
+            margin: 10px auto;
+        }
+
+        .box p {
+            background: pink;
+        }
+
+        /* 向上箭头 */
+        .to_top {
+            width: 0;
+            height: 0;
+            border-bottom: 60px solid #f0f;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+        }
+
+        /* 向左箭头 */
+        .to_left {
+            width: 0;
+            height: 0;
+            border-right: 60px solid #ffd900;
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+        }
+
+        /* 向右箭头 */
+        .to_right {
+            width: 0;
+            height: 0;
+            border-left: 60px solid greenyellow;
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+        }
+
+        /* 向下箭头 */
+        .to_bottom {
+            width: 0;
+            height: 0;
+            border-top: 60px solid skyblue;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+        }
+
+        #ctl_go_main {
+            align-content: center;
+        }
+
+        #ctl_go {
+            width: 120px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+        }
+
+        #ctl_left {
+            height: 60px;
+            float: left;
+            margin-left: 30px;
+        }
+
+        #ctl_right {
+            height: 60px;
+            float: right;
+            margin-right: 30px;
+        }
+
+        .ctl_back_main {
+            margin-top: 180px;
+            align-content: center;
+        }
+
+        .ctl_back {
+            width: 120px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+        }
+
+        #messages {
+            margin: auto;
+            align-content: center;
+        }
+
+        #showmessages {
+            height: 200px;
+            width: 100%;
+        }
+
+        .msg_connect button {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div id="vvv">
+            <!-- <img id="stream" src="http://192.168.155.238:81/stream"> -->
+        </div>
+        <div id="ctl">
+            <div class="box">
+                <div id="ctl_go_main">
+                    <div id="ctl_go">
+                        <div class="to_top"></div>
+                    </div>
+                </div>
+                <div id="ctl_min">
+                    <div id="ctl_left">
+                        <div class="to_left"></div>
+                    </div>
+                    <div id="ctl_right">
+                        <div class="to_right"></div>
+                    </div>
+                </div>
+                <!-- <div id="ctl_back">
+                    <div class="to_bottom"></div>
+                </div> -->
+                <div class="ctl_back_main">
+                    <div class="ctl_back">
+                        <div class="to_bottom"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="messages">
+                <textarea id="showmessages"></textarea>
+                <div class="msg_connect">
+                    <button id="reconnect">重连</button>
+                    <button id="closeconnect">断开</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // document.ontouchstart = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.ontouchend = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.onclick = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.ondblclick = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        var $ = function (selector) { return document.querySelector(selector); };
+        $.urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results == null) { return null; }
+            else { return decodeURI(results[1]) || 0; }
+        }
+        function show(f, y) {
+            if (y == null) y = f;
+            $(f).style.display = y == f ? 'block' : 'none';
+        }
+        function hide(f) {
+            $(f).style.display = 'none';
+        }
+        function fetch(url, method, callback, time_out) {
+            var xhr = new XMLHttpRequest();
+            xhr.onloadend = function () {
+                callback(xhr.status, xhr.responseText);
+            }
+            xhr.ontimeout = function () {
+                callback(-1, null);
+            }
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.timeout = (time_out || 10) * 1000;
+            xhr.send();
+        }
+    </script>
+    <script>
+        function ArrayBufferUTF8ToStr(array) {
+            var out, i, len, c;
+            var char2, char3;
+            if (array instanceof ArrayBuffer) {
+                array = new Uint8Array(array);
+            }
+            out = "";
+            len = array.length;
+            i = 0;
+            while (i < len) {
+                c = array[i++];
+                switch (c >> 4) {
+                    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+                        // 0xxxxxxx
+                        out += String.fromCharCode(c);
+                        break;
+                    case 12: case 13:
+                        // 110x xxxx   10xx xxxx
+                        char2 = array[i++];
+                        out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+                        break;
+                    case 14:
+                        // 1110 xxxx  10xx xxxx  10xx xxxx
+                        char2 = array[i++];
+                        char3 = array[i++];
+                        out += String.fromCharCode(((c & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            ((char3 & 0x3F) << 0));
+                        break;
+                }
+            }
+            return out;
+        }
+        function appendMsgs(textMsg) {
+            $("#showmessages").value = $("#showmessages").value + "\r\n" + new Date().toLocaleTimeString() + " " + textMsg
+            $("#showmessages").scrollTop = $("#showmessages").scrollHeight;
+        }
+        function appendSendMsgs(textMsg) { appendMsgs("【发送】" + textMsg) }
+        function appendRecMsgs(textMsg) { appendMsgs("【收到】" + textMsg) }
+        function sendMsg(ws, msg) {
+            if (!ws || !ws.readyState || ws.readyState != 1) {
+                console.log(new Date().toLocaleTimeString(), "ws is not open:", ws)
+                appendMsgs("ws is not open:" + ws)
+                return false;
+            }
+            ws.send(msg)
+            appendSendMsgs(msg)
+        }
+    </script>
+    <script>
+        var setInterval2Action = 0
+        var setInterval2Action_delay = 100//ms
+        var setTimeout2Stop = 0
+        var setTimeout2Stop_delay = 700//ms
+        var ws
+        var url
+        url = 'ws://192.168.155.254:9999/'
+        function tcpSocket(url) {
+            console.log(new Date().toLocaleTimeString(), "connecting to " + url)
+            appendMsgs("connecting to " + url)
+            let connection = new WebSocket(url);
+            connection.onerror = function (event) {
+                console.error(new Date().toLocaleTimeString(), connection, 'onError', event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+            }
+            connection.onopen = function (event) {
+                console.warn(new Date().toLocaleTimeString(), connection, 'onOpen', event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+            }
+            connection.onmessage = function (event) {
+                let rec = ArrayBufferUTF8ToStr(event.data)
+                console.info(new Date().toLocaleTimeString(), connection, 'onMessage', event, rec)
+                appendRecMsgs(rec)
+            }
+            connection.onclose = function (event) {
+                console.warn(new Date().toLocaleTimeString(), connection, "onClose", event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+            }
+            return connection
+        }
+        function stopFun(ws) {
+            clearTimeout(setTimeout2Stop)
+            clearInterval(setInterval2Action)
+            console.log(new Date().toLocaleTimeString(), "stopFun call")
+            appendMsgs("stopFun call")
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            sendMsg(ws, "stop")
+        }
+        function touchStartFun(ws, act) {
+            clearTimeout(setTimeout2Stop)
+            clearInterval(setInterval2Action)
+            console.log(new Date().toLocaleTimeString(), ws, "touchStartFun call", act)
+            appendMsgs("touchStartFun call:" + act)
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            let go_fun = function (ws) {
+                if (!ws || ws.readyState != 1) {
+                    clearInterval(setInterval2Action)
+                    return
+                }
+                if (act == "left") {
+                    act = "go_1023_" + -1023
+                } else
+                    if (act == "right") {
+                        act = "go_1023_" + 1023
+                    } else
+                        if (act == "go") {
+                            act = "go_1023_0";
+                        }
+                sendMsg(ws, act)
+            }
+            go_fun(ws)
+            setInterval2Action = setInterval(function (ws) {
+                go_fun(ws)
+            }, setInterval2Action_delay, ws)
+        }
+        function touchEndFun(ws) {
+            clearTimeout(setTimeout2Stop)
+            console.log(new Date().toLocaleTimeString(), "touchEndFun call")
+            appendMsgs("touchEndFun call")
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            setTimeout2Stop = setTimeout(function (ws) {
+                stopFun(ws)
+            }, setTimeout2Stop_delay, ws)
+        }
+        var ws
+        var timer
+        var timeout
+        var url
+        url = 'ws://192.168.155.254:9999/'
+        window.onload = function () {
+            ws = tcpSocket(url)
+            console.log(new Date().toLocaleTimeString(), "tcpSocket", ws)
+        }
+        var to_top_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "go")
+            return false
+        }
+        var to_top_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_left_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "left")
+            return false
+        }
+        var to_left_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_right_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "right")
+            return false
+        }
+        var to_right_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_bottom_ontouchstart = function (evt) {
+            evt.preventDefault();
+            stopFun(ws)
+            return false
+        }
+        var to_bottom_ontouchend = function (evt) {
+            evt.preventDefault();
+            return false
+        }
+        $(".to_top").ontouchstart = to_top_ontouchstart
+        $(".to_top").ontouchend = to_top_ontouchend
+        $(".to_left").ontouchstart = to_left_ontouchstart
+        $(".to_left").ontouchend = to_left_ontouchend
+        $(".to_right").ontouchstart = to_right_ontouchstart
+        $(".to_right").ontouchend = to_right_ontouchend
+        $(".to_bottom").ontouchstart = to_bottom_ontouchstart
+        $(".to_bottom").ontouchend = to_bottom_ontouchend
+        $("#reconnect").onclick = function () {
+            stopFun(ws)
+            if (ws && ws.readyState == 1) {
+                return
+            }
+            ws = tcpSocket(url)
+            console.log(new Date().toLocaleTimeString(), "refresh", ws)
+        }
+        $("#closeconnect").onclick = function () {
+            if (ws && ws.readyState == 1) {
+                ws.close()
+            }
+        }
+    </script>
+</body>
+
+</html>

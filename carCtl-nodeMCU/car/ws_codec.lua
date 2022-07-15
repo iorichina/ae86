@@ -182,6 +182,7 @@ local res_prefix = "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nU
 local function handshakeRes(req)
     local accept = acceptKey(req.headers["Sec-WebSocket-Key"])
     local ress = res_prefix .. accept .. "\r\n"
+    accept = nil
     -- if req.headers["Sec-WebSocket-Extensions"] then
     --     ress = ress .. "Sec-WebSocket-Extensions: " .. req.headers["Sec-WebSocket-Extensions"] .. "\r\n"
     -- end
@@ -229,6 +230,9 @@ local function parseRequest(reqStr)
             end
         end
     end
+    t = nil
+    x = nil
+    collectgarbage()
     return req
 end
 local function handshakeRequest(reqStr)
@@ -239,6 +243,8 @@ local function handshakeRequest(reqStr)
     if not f then
         return nil
     end
+    f = nil
+    collectgarbage()
     return parseRequest(reqStr)
 end
 return {

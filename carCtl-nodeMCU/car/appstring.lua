@@ -31,6 +31,7 @@ M.tsplit = function(s, sep)
     for c in M.fsplit(s, sep) do
         table.insert(t, c)
     end
+    collectgarbage()
     return t
 end
 

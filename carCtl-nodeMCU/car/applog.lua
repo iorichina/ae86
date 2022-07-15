@@ -8,6 +8,8 @@ M.print = function(...)
         arg[i] = tostring(arg[i])
     end
     print(apprtctime.hmsm() .. " " .. table.concat(arg, " "))
+    arg = nil
+    collectgarbage()
 end
 
 M.channel_print = function(channel, encoder, ...)
@@ -30,6 +32,9 @@ M.channel_print = function(channel, encoder, ...)
         end
     end, channel, encoder, str)
     print(apprtctime.hmsm() .. " " .. tostring(channel) .. " " .. table.concat(arg, " "))
+    str = nil
+    arg = nil
+    collectgarbage()
 end
 
 return M

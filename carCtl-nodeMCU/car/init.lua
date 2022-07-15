@@ -4,6 +4,16 @@ require("applog")
 
 applog.print("init")
 
--- web page for start socket
-local e = pcall(dofile, "start.lua")
-applog.print("init started:", e)
+require("enduser_setup")
+applog.print("start enduser_setup")
+enduser_setup.start()
+
+-- socket_client.lua
+-- socket_server.lua
+-- websocket_client.lua
+-- websocket_server.lua
+local fileName = "websocket_server.lua"
+applog.print("start", fileName)
+dofile(fileName)
+
+collectgarbage()
