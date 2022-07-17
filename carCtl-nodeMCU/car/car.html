@@ -320,14 +320,15 @@
                     clearInterval(setInterval2Action)
                     return
                 }
+                //go_{left_duty}_{right_duty}
                 if (act == "left") {
-                    act = "go_1023_" + -1023
+                    act = "go_0_1023"
                 } else
                     if (act == "right") {
-                        act = "go_1023_" + 1023
+                        act = "go_1023_0"
                     } else
                         if (act == "go") {
-                            act = "go_1023_0";
+                            act = "go_1023_1023";
                         }
                 sendMsg(ws, act)
             }
