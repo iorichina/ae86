@@ -32,5 +32,6 @@
 *.app
 
 .gitee
+.vscode
 wifi_config.h
 wifikeys.h

@@ -20,6 +20,15 @@
 #define ENABLE_WEBSERVER
 #define ENABLE_RTSPSERVER
 
+#ifdef ENABLE_OLED
+#include "SSD1306.h"
+#define OLED_ADDRESS 0x3c
+#define I2C_SDA 14
+#define I2C_SCL 13
+SSD1306Wire display(OLED_ADDRESS, I2C_SDA, I2C_SCL, GEOMETRY_128_32);
+bool hasDisplay; // we probe for the device at runtime
+#endif
+
 OV2640 cam;
 
 #ifdef ENABLE_WEBSERVER
@@ -29,7 +38,6 @@ WebServer server(80);
 #ifdef ENABLE_RTSPSERVER
 WiFiServer rtspServer(8554);
 #endif
-
 
 #ifdef SOFTAP_MODE
 IPAddress apIP = IPAddress(192, 168, 1, 1);
@@ -91,42 +99,99 @@ void handleNotFound()
 }
 #endif
 
-void reconnect()
+#ifdef ENABLE_OLED
+#define LCD_MESSAGE(msg) lcdMessage(msg)
+#else
+#define LCD_MESSAGE(msg)
+#endif
+
+#ifdef ENABLE_OLED
+void lcdMessage(String msg)
 {
+    if (hasDisplay)
+    {
+        display.clear();
+        display.drawString(128 / 2, 32 / 2, msg);
+        display.display();
+    }
+}
+#endif
+
+CStreamer *streamer;
+
+IPAddress reconnect()
+{
+    IPAddress ip;
+#ifdef SOFTAP_MODE
+    const char *hostname = "devcam";
+    // WiFi.hostname(hostname); // FIXME - find out why undefined
+    LCD_MESSAGE("starting softAP");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    bool result = WiFi.softAP(hostname, "12345678", 1, 0);
+    if (!result)
+    {
+        Serial.println("AP Config failed.");
+        return;
+    }
+    else
+    {
+        Serial.println("AP Config Success.");
+        Serial.print("AP MAC: ");
+        Serial.println(WiFi.softAPmacAddress());
+
+        ip = WiFi.softAPIP();
+    }
+
+    LCD_MESSAGE(ip.toString());
+#else
     if (WiFi.status() == WL_CONNECTED)
     {
         // Serial.print("Local ip:");
         // Serial.println(WiFi.localIP());
         return;
     }
-    IPAddress ip;
 
     Serial.print("WiFi joining ");
     Serial.println(ssid);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    int retry = 10;
+    // WiFi.setAutoConnect(true);   // Wifi设置函数,ture是真，假为false,setAutoConnect为自动连接
+    WiFi.setAutoReconnect(true); // Wifi设置函数,ture是真，假为false，setAutoReconnect自动重连
+    // int retry = 10;
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.print(F("."));
-        retry--;
-        if (retry < 1)
-        {
-            Serial.println("WiFi connect fail");
-            return;
-        }
+        // retry--;
+        // if (retry < 1)
+        // {
+        //     Serial.println("WiFi connect fail");
+        //     return;
+        // }
     }
     Serial.println();
     ip = WiFi.localIP();
     Serial.print(F("WiFi connected @"));
     Serial.println(ip);
-}
+#endif
 
-CStreamer *streamer;
+    return ip
+}
 
 void setup()
 {
+#ifdef ENABLE_OLED
+    hasDisplay = display.init();
+    if (hasDisplay)
+    {
+        display.flipScreenVertically();
+        display.setFont(ArialMT_Plain_16);
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+    }
+#endif
+    LCD_MESSAGE("booting");
+
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     while (!Serial)
@@ -137,7 +202,7 @@ void setup()
     Serial.println("booting");
     sd_init();
     psram_init();
-    reconnect();
+    IPAddress ip = reconnect();
     ////
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
@@ -174,7 +239,7 @@ void setup()
         config.jpeg_quality = 12;
         config.fb_count = 1;
     }
-    
+
     esp_err_t err = cam.init(config);
     if (err != ESP_OK)
     {
@@ -195,27 +260,42 @@ void setup()
 
 #ifdef ENABLE_WEBSERVER
     server.on("/", HTTP_GET, handle_jpg_stream);
+    Serial.print("jpeg stream at http://");
+    Serial.print(ip);
+    Serial.println("/");
+
     server.on("/jpg", HTTP_GET, handle_jpg);
+    Serial.print("jpeg capture at http://");
+    Serial.print(ip);
+    Serial.println("/jpg");
+
     server.onNotFound(handleNotFound);
     server.begin();
 #endif
 
 #ifdef ENABLE_RTSPSERVER
     rtspServer.begin();
+    Serial.print("rtsp stream at http://");
+    Serial.print(ip);
+    Serial.print(":8554/mjpeg/1 and http://");
+    Serial.print(ip);
+    Serial.print(":8554/mjpeg/2");
 
-    //streamer = new SimStreamer(true);             // our streamer for UDP/TCP based RTP transport
-    streamer = new OV2640Streamer(cam);             // our streamer for UDP/TCP based RTP transport
+    // streamer = new SimStreamer(true);             // our streamer for UDP/TCP based RTP transport
+    streamer = new OV2640Streamer(cam); // our streamer for UDP/TCP based RTP transport
 #endif
 }
 
 void loop()
 {
-    reconnect();
+    // 已经自动重连
+    // reconnect();
 #ifdef ENABLE_WEBSERVER
     server.handleClient();
 #endif
 
 #ifdef ENABLE_RTSPSERVER
+    // 下发给客户端的每帧间隔
     uint32_t msecPerFrame = 10;
     static uint32_t lastimage = millis();
 
@@ -223,21 +303,27 @@ void loop()
     streamer->handleRequests(0); // we don't use a timeout here,
     // instead we send only if we have new enough frames
     uint32_t now = millis();
-    if(streamer->anySessions()) {
-        if(now > lastimage + msecPerFrame || now < lastimage) { // handle clock rollover
+    if (streamer->anySessions())
+    {
+        if (now > lastimage + msecPerFrame || now < lastimage)
+        { // handle clock rollover
             streamer->streamImage(now);
             lastimage = now;
 
             // check if we are overrunning our max frame rate
             now = millis();
-            if(now > lastimage + msecPerFrame) {
+            // msecPerFrame = 100;
+            // 判断下发完成的时延是否比每帧间隔要大，是则打日志告警
+            if (now > lastimage + msecPerFrame)
+            {
                 printf("warning exceeding max frame rate of %d ms\n", now - lastimage);
             }
         }
     }
 
     WiFiClient rtspClient = rtspServer.accept();
-    if(rtspClient) {
+    if (rtspClient)
+    {
         Serial.print("client: ");
         Serial.print(rtspClient.remoteIP());
         Serial.println();
