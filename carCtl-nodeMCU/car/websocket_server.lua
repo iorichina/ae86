@@ -92,14 +92,15 @@ local start = function(t)
         t:unregister()
         return
     end
+
     if wifi.sta.status() ~= wifi.STA_GOTIP then
         applog.print("waiting for wifi connection")
         return
     end
-
     local ip = wifi.sta.getip()
-    applog.print("local ip:", ip)
-    wsvr = net.createServer(net.TCP, 120)
+    applog.print("local sta ip:", ip)
+    -- local ip = wifi.ap.getip()
+    -- applog.print("local ap ip:", ip)
 
     local left_pin = 5
     local left_duty = 0
@@ -141,6 +142,7 @@ local start = function(t)
     end
 
     local port = 9999
+    wsvr = net.createServer(net.TCP, 120)
     applog.print("websocket: listening to port ", port)
     wsvr:listen(port, function(cli)
         cli:on("connection", function(c, s)

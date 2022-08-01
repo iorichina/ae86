@@ -13,6 +13,11 @@
 //
 #define CAMERA_MODEL_HONGKE // Has PSRAM
 #include "camera_pins.h"
+
+//const char *sta_ssid = "ssid";
+//const char *sta_password = "pwd";
+//const char *ap_ssid = "my_ssid";
+//const char *ap_password = "my_pwd";
 #include "wifi_config.h"
 
 void startCameraServer();
@@ -26,6 +31,8 @@ void setup()
   psram_init();
 
   reconnect();
+//  startAp();
+  
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -82,6 +89,23 @@ void setup()
   s->set_framesize(s, FRAMESIZE_QVGA);
 
   startCameraServer();
+}
+void startAp() {
+  IPAddress local_IP(192,168,5,1);//手动设置的开启的网络的ip地址
+  IPAddress gateway(192,168,5,1);  //手动设置的网关IP地址
+  IPAddress subnet(255,255,255,0); //手动设置的子网掩码
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(local_IP, gateway, subnet);
+  WiFi.softAP(ap_ssid, ap_password);
+  Serial.println();
+  Serial.print("Started AP ssid[");
+  Serial.print(ap_ssid);
+  Serial.print("], pwd[");
+  Serial.print(ap_password);
+  Serial.println("]");
+  Serial.print("open url for stream:http://");
+  Serial.print(WiFi.softAPIP());
+  Serial.println(":81/stream");
 }
 void reconnect()
 {

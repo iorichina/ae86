@@ -137,7 +137,8 @@
 <body>
     <div id="content">
         <div id="vvv">
-            <img id="stream" src="http://192.168.155.238:81/stream">
+            <!-- <img id="stream" src="http://192.168.155.238:81/stream"> -->
+            <img id="stream" src="http://192.168.5.1:81/stream">
         </div>
         <div id="ctl">
             <div class="box">
@@ -271,9 +272,6 @@
         var setInterval2Action_delay = 100//ms
         var setTimeout2Stop = 0
         var setTimeout2Stop_delay = 700//ms
-        var ws
-        var url
-        url = 'ws://192.168.155.254:9999/'
         function tcpSocket(url) {
             console.log(new Date().toLocaleTimeString(), "connecting to " + url)
             appendMsgs("connecting to " + url)
@@ -348,11 +346,12 @@
                 stopFun(ws)
             }, setTimeout2Stop_delay, ws)
         }
+        
         var ws
-        var timer
-        var timeout
         var url
         url = 'ws://192.168.155.254:9999/'
+        url = 'ws://192.168.4.1:9999/'
+        url = 'ws://192.168.5.5:9999/'
         window.onload = function () {
             ws = tcpSocket(url)
             console.log(new Date().toLocaleTimeString(), "tcpSocket", ws)
