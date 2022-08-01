@@ -275,9 +275,9 @@ void setup()
 
 #ifdef ENABLE_RTSPSERVER
     rtspServer.begin();
-    Serial.print("rtsp stream at http://");
+    Serial.print("rtsp stream at rtsp://");
     Serial.print(ip);
-    Serial.print(":8554/mjpeg/1 and http://");
+    Serial.print(":8554/mjpeg/1 and rtsp://");
     Serial.print(ip);
     Serial.print(":8554/mjpeg/2");
 
