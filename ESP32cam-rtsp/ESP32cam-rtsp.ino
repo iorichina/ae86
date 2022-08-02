@@ -132,7 +132,7 @@ IPAddress reconnect()
     if (!result)
     {
         Serial.println("AP Config failed.");
-        return;
+        return WiFi.softAPIP();
     }
     else
     {
@@ -149,7 +149,7 @@ IPAddress reconnect()
     {
         // Serial.print("Local ip:");
         // Serial.println(WiFi.localIP());
-        return;
+        return WiFi.localIP();
     }
 
     Serial.print("WiFi joining ");
@@ -176,7 +176,7 @@ IPAddress reconnect()
     Serial.println(ip);
 #endif
 
-    return ip
+    return ip;
 }
 
 void setup()
