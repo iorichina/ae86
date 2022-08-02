@@ -16,7 +16,9 @@
 #include "camera_pins.h"
 
 // #define ENABLE_OLED //if want use oled ,turn on thi macro
-// #define SOFTAP_MODE // If you want to run our own softap turn this on
+#define SOFTAP_MODE // If you want to run our own softap turn this on
+#include "wifikeys.h"
+
 #define ENABLE_WEBSERVER
 #define ENABLE_RTSPSERVER
 
@@ -29,8 +31,6 @@ SSD1306Wire display(OLED_ADDRESS, I2C_SDA, I2C_SCL, GEOMETRY_128_32);
 bool hasDisplay; // we probe for the device at runtime
 #endif
 
-OV2640 cam;
-
 #ifdef ENABLE_WEBSERVER
 WebServer server(80);
 #endif
@@ -39,12 +39,7 @@ WebServer server(80);
 WiFiServer rtspServer(8554);
 #endif
 
-#ifdef SOFTAP_MODE
-IPAddress apIP = IPAddress(192, 168, 1, 1);
-#else
-#include "wifikeys.h"
-#endif
-
+OV2640 cam;
 #ifdef ENABLE_WEBSERVER
 void handle_jpg_stream(void)
 {
@@ -117,33 +112,37 @@ void lcdMessage(String msg)
 }
 #endif
 
-CStreamer *streamer;
+bool apStarted = false;
+IPAddress startAp()
+{
+    if (apStarted)
+    {
+        return WiFi.softAPIP();
+    }
 
-IPAddress reconnect()
+    WiFi.mode(WIFI_AP);
+    apStarted = true;
+    IPAddress local_IP(192, 168, 5, 1); //手动设置的开启的网络的ip地址
+    IPAddress gateway(192, 168, 5, 1);  //手动设置的网关IP地址
+    IPAddress subnet(255, 255, 255, 0); //手动设置的子网掩码
+    WiFi.softAPConfig(local_IP, gateway, subnet);
+    WiFi.softAP(ap_ssid, ap_password);
+
+    Serial.println();
+    Serial.print("Started AP ssid[");
+    Serial.print(ap_ssid);
+    Serial.print("], pwd[");
+    Serial.print(ap_password);
+    Serial.println("]");
+
+    return WiFi.softAPIP();
+}
+
+IPAddress wifiConfig()
 {
     IPAddress ip;
 #ifdef SOFTAP_MODE
-    const char *hostname = "devcam";
-    // WiFi.hostname(hostname); // FIXME - find out why undefined
-    LCD_MESSAGE("starting softAP");
-    WiFi.mode(WIFI_AP);
-    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    bool result = WiFi.softAP(hostname, "12345678", 1, 0);
-    if (!result)
-    {
-        Serial.println("AP Config failed.");
-        return WiFi.softAPIP();
-    }
-    else
-    {
-        Serial.println("AP Config Success.");
-        Serial.print("AP MAC: ");
-        Serial.println(WiFi.softAPmacAddress());
-
-        ip = WiFi.softAPIP();
-    }
-
-    LCD_MESSAGE(ip.toString());
+    ip = startAp();
 #else
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -153,22 +152,15 @@ IPAddress reconnect()
     }
 
     Serial.print("WiFi joining ");
-    Serial.println(ssid);
+    Serial.println(sta_ssid);
     WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+    WiFi.begin(sta_ssid, sta_password);
     // WiFi.setAutoConnect(true);   // Wifi设置函数,ture是真，假为false,setAutoConnect为自动连接
     WiFi.setAutoReconnect(true); // Wifi设置函数,ture是真，假为false，setAutoReconnect自动重连
-    // int retry = 10;
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.print(F("."));
-        // retry--;
-        // if (retry < 1)
-        // {
-        //     Serial.println("WiFi connect fail");
-        //     return;
-        // }
     }
     Serial.println();
     ip = WiFi.localIP();
@@ -179,31 +171,7 @@ IPAddress reconnect()
     return ip;
 }
 
-void setup()
-{
-#ifdef ENABLE_OLED
-    hasDisplay = display.init();
-    if (hasDisplay)
-    {
-        display.flipScreenVertically();
-        display.setFont(ArialMT_Plain_16);
-        display.setTextAlignment(TEXT_ALIGN_CENTER);
-    }
-#endif
-    LCD_MESSAGE("booting");
-
-    Serial.begin(115200);
-    Serial.setDebugOutput(true);
-    while (!Serial)
-    {
-        ;
-    }
-    ///
-    Serial.println("booting");
-    sd_init();
-    psram_init();
-    IPAddress ip = reconnect();
-    ////
+camera_config_t camConfig() {
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
     config.ledc_timer = LEDC_TIMER_0;
@@ -230,6 +198,7 @@ void setup()
     if (psramFound())
     {
         config.frame_size = FRAMESIZE_UXGA;
+        Serial.println("cam needs 234K of framebuffer space");
         config.jpeg_quality = 10;
         config.fb_count = 2;
     }
@@ -239,6 +208,36 @@ void setup()
         config.jpeg_quality = 12;
         config.fb_count = 1;
     }
+    return config;
+}
+
+CStreamer *streamer;
+void setup()
+{
+#ifdef ENABLE_OLED
+    hasDisplay = display.init();
+    if (hasDisplay)
+    {
+        display.flipScreenVertically();
+        display.setFont(ArialMT_Plain_16);
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+    }
+#endif
+    LCD_MESSAGE("booting");
+
+    Serial.begin(115200);
+    Serial.setDebugOutput(true);
+    while (!Serial)
+    {
+        ;
+    }
+    ///
+    Serial.println("booting");
+    sd_init();
+    psram_init();
+    IPAddress ip = wifiConfig();
+    ////
+    camera_config_t config = camConfig();
 
     esp_err_t err = cam.init(config);
     if (err != ESP_OK)
@@ -289,7 +288,7 @@ void setup()
 void loop()
 {
     // 已经自动重连
-    // reconnect();
+    // wifiConfig();
 #ifdef ENABLE_WEBSERVER
     server.handleClient();
 #endif
@@ -312,9 +311,8 @@ void loop()
 
             // check if we are overrunning our max frame rate
             now = millis();
-            // msecPerFrame = 100;
-            // 判断下发完成的时延是否比每帧间隔要大，是则打日志告警
-            if (now > lastimage + msecPerFrame)
+            // 判断完成下发一帧的时延是否太大，是则打日志告警
+            if (now > lastimage + 30)
             {
                 printf("warning exceeding max frame rate of %d ms\n", now - lastimage);
             }
