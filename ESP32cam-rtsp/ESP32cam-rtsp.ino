@@ -89,7 +89,7 @@ void handleNotFound()
     message += (server.method() == HTTP_GET) ? "GET" : "POST";
     message += "\nArguments: ";
     message += server.args();
-    message += "\n";
+    message += "\n"; 
     server.send(200, "text/plain", message);
 }
 #endif
@@ -191,6 +191,7 @@ camera_config_t camConfig() {
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
+    //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
     config.xclk_freq_hz = 20000000;
     config.pixel_format = PIXFORMAT_JPEG;
     // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
@@ -278,7 +279,7 @@ void setup()
     Serial.print(ip);
     Serial.print(":8554/mjpeg/1 and rtsp://");
     Serial.print(ip);
-    Serial.print(":8554/mjpeg/2");
+    Serial.println(":8554/mjpeg/2");
 
     // streamer = new SimStreamer(true);             // our streamer for UDP/TCP based RTP transport
     streamer = new OV2640Streamer(cam); // our streamer for UDP/TCP based RTP transport

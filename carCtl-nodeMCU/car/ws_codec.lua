@@ -12,6 +12,20 @@ package.loaded[module] = M
 --     return string.char(bit.rshift(num, 24), bit.band(bit.rshift(num, 16), 0xff), bit.band(bit.rshift(num, 8), 0xff), bit.band(num, 0xff))
 -- end
 
+local applyMask = function(data, mask)
+    local bytes = {
+        [0] = string.byte(mask, 1),
+        [1] = string.byte(mask, 2),
+        [2] = string.byte(mask, 3),
+        [3] = string.byte(mask, 4)
+    }
+    local out = {}
+    for i = 1, #data do
+        out[i] = string.char(bit.bxor(string.byte(data, i), bytes[(i - 1) % 4]))
+    end
+    return table.concat(out)
+end
+
 M.decode = function(chunk)
     if #chunk < 2 then
         return
@@ -48,22 +62,23 @@ M.decode = function(chunk)
     assert(#payload == len, "Length mismatch")
     if mask then
 
-        local applyMask = function(data, mask)
-            local bytes = {
-                [0] = string.byte(mask, 1),
-                [1] = string.byte(mask, 2),
-                [2] = string.byte(mask, 3),
-                [3] = string.byte(mask, 4)
-            }
-            local out = {}
-            for i = 1, #data do
-                out[i] = string.char(bit.bxor(string.byte(data, i), bytes[(i - 1) % 4]))
-            end
-            return table.concat(out)
-        end
+        -- local applyMask = function(data, mask)
+        --     local bytes = {
+        --         [0] = string.byte(mask, 1),
+        --         [1] = string.byte(mask, 2),
+        --         [2] = string.byte(mask, 3),
+        --         [3] = string.byte(mask, 4)
+        --     }
+        --     local out = {}
+        --     for i = 1, #data do
+        --         out[i] = string.char(bit.bxor(string.byte(data, i), bytes[(i - 1) % 4]))
+        --     end
+        --     return table.concat(out)
+        -- end
 
         payload = applyMask(payload, string.sub(chunk, offset - 3, offset))
-        applyMask = nil
+        -- applyMask = nil
+        print("ws_codec decode applyMask")
         collectgarbage()
     end
     local extra = string.sub(chunk, offset + len + 1)
@@ -79,64 +94,65 @@ M.decode = function(chunk)
     }, extra
 end
 
--- local function encode(item)
---     if type(item) == "string" then
---         item = {
---             opcode = 2,
---             payload = item
---         }
---     end
---     local payload = item.payload
---     assert(type(payload) == "string", "payload must be string")
---     local len = #payload
---     local fin = item.fin
---     if fin == nil then
---         fin = true
---     end
---     local rsv1 = item.rsv1
---     local rsv2 = item.rsv2
---     local rsv3 = item.rsv3
---     local opcode = item.opcode or 2
---     local mask = item.mask
---     local chars = {string.char(bit.bor(fin and 0x80 or 0, rsv1 and 0x40 or 0, rsv2 and 0x20 or 0, rsv3 and 0x10 or 0, opcode)), string.char(bit.bor(mask and 0x80 or 0, len < 126 and len or (len < 0x10000) and 126 or 127))}
---     if len >= 0x10000 then
---         local high = len / 0x100000000
---         chars[3] = string.char(bit.band(bit.rshift(high, 24), 0xff))
---         chars[4] = string.char(bit.band(bit.rshift(high, 16), 0xff))
---         chars[5] = string.char(bit.band(bit.rshift(high, 8), 0xff))
---         chars[6] = string.char(bit.band(high, 0xff))
---         chars[7] = string.char(bit.band(bit.rshift(len, 24), 0xff))
---         chars[8] = string.char(bit.band(bit.rshift(len, 16), 0xff))
---         chars[9] = string.char(bit.band(bit.rshift(len, 8), 0xff))
---         chars[10] = string.char(bit.band(len, 0xff))
---     elseif len >= 126 then
---         chars[3] = string.char(bit.band(bit.rshift(len, 8), 0xff))
---         chars[4] = string.char(bit.band(len, 0xff))
---     end
---     if mask then
---         local key = rand4()
+M.encode = function(item)
+    if type(item) == "string" then
+        item = {
+            opcode = 1,
+            payload = item
+        }
+    end
+    local payload = item.payload
+    assert(type(payload) == "string", "payload must be string")
+    local len = #payload
+    local fin = item.fin
+    if fin == nil then
+        fin = true
+    end
+    local rsv1 = item.rsv1
+    local rsv2 = item.rsv2
+    local rsv3 = item.rsv3
+    local opcode = item.opcode or 2
+    local mask = item.mask
+    local chars = {string.char(bit.bor(fin and 0x80 or 0, rsv1 and 0x40 or 0, rsv2 and 0x20 or 0, rsv3 and 0x10 or 0, opcode)), string.char(bit.bor(mask and 0x80 or 0, len < 126 and len or (len < 0x10000) and 126 or 127))}
+    if len >= 0x10000 then
+        local high = len / 0x100000000
+        chars[3] = string.char(bit.band(bit.rshift(high, 24), 0xff))
+        chars[4] = string.char(bit.band(bit.rshift(high, 16), 0xff))
+        chars[5] = string.char(bit.band(bit.rshift(high, 8), 0xff))
+        chars[6] = string.char(bit.band(high, 0xff))
+        chars[7] = string.char(bit.band(bit.rshift(len, 24), 0xff))
+        chars[8] = string.char(bit.band(bit.rshift(len, 16), 0xff))
+        chars[9] = string.char(bit.band(bit.rshift(len, 8), 0xff))
+        chars[10] = string.char(bit.band(len, 0xff))
+    elseif len >= 126 then
+        chars[3] = string.char(bit.band(bit.rshift(len, 8), 0xff))
+        chars[4] = string.char(bit.band(len, 0xff))
+    end
+    if mask then
+        local key = rand4()
 
--- local applyMask = function(data, mask)
---   local bytes = {
---       [0] = string.byte(mask, 1),
---       [1] = string.byte(mask, 2),
---       [2] = string.byte(mask, 3),
---       [3] = string.byte(mask, 4)
---   }
---   local out = {}
---   for i = 1, #data do
---       out[i] = string.char(bit.bxor(string.byte(data, i), bytes[(i - 1) % 4]))
---   end
---   return table.concat(out)
--- end
+        -- local applyMask = function(data, mask)
+        --     local bytes = {
+        --         [0] = string.byte(mask, 1),
+        --         [1] = string.byte(mask, 2),
+        --         [2] = string.byte(mask, 3),
+        --         [3] = string.byte(mask, 4)
+        --     }
+        --     local out = {}
+        --     for i = 1, #data do
+        --         out[i] = string.char(bit.bxor(string.byte(data, i), bytes[(i - 1) % 4]))
+        --     end
+        --     return table.concat(out)
+        -- end
 
--- local res = table.concat(chars) .. key .. applyMask(payload, key)
--- applyMask = nil
--- collectgarbage()
--- return res
---     end
---     return table.concat(chars) .. payload
--- end
+        local res = table.concat(chars) .. key .. applyMask(payload, key)
+        -- applyMask = nil
+        print("ws_codec encode applyMask")
+        collectgarbage()
+        return res
+    end
+    return table.concat(chars) .. payload
+end
 
 M.handshakeRes = function(req)
     local acceptKey = function(key)

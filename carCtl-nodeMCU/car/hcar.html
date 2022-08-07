@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html>
+
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>小车控制</title>
+
+    <style type=text/css>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: sans-serif;
+            text-align: center;
+            background: #444d44;
+        }
+
+        #content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            /* width: 320px; */
+            /* height: 480px; */
+            margin: auto;
+        }
+    </style>
+    <style type="text/css">
+        #vvv {
+            margin: auto;
+        }
+
+        .box {
+            width: 300px;
+            /* height: 100px; */
+            text-align: center;
+            margin: 10px auto;
+            border: 0px;
+        }
+
+        .box p {
+            background: pink;
+        }
+
+        #ctl_go_main {
+            align-content: center;
+        }
+
+        #ctl_go_left {
+            width: 60px;
+            height: 60px;
+            margin-left: 30px;
+            margin-bottom: 30px;
+            float: left;
+        }
+
+        /* 左上箭头 */
+        .to_top_left {
+            width: 0;
+            height: 0;
+            border-left: 30px solid #f0f;
+            border-top: 30px solid #f0f;
+            border-right: 30px solid transparent;
+            border-bottom: 30px solid transparent;
+        }
+
+        #ctl_go {
+            width: 120px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+            float: left;
+        }
+
+        /* 向上箭头 */
+        .to_top {
+            width: 0;
+            height: 0;
+            border-bottom: 60px solid #f0f;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+        }
+
+        #ctl_go_right {
+            width: 60px;
+            height: 0px;
+            margin-right: 30px;
+            margin-bottom: 30px;
+            float: right;
+        }
+
+        /* 右上箭头 */
+        .to_top_right {
+            width: 0;
+            height: 0;
+            border-right: 30px solid #f0f;
+            border-top: 30px solid #f0f;
+            border-left: 30px solid transparent;
+            border-bottom: 30px solid transparent;
+        }
+
+        #ctl_min {}
+
+        #ctl_left {
+            height: 60px;
+            float: left;
+            margin-left: 30px;
+        }
+
+        /* 向左箭头 */
+        .to_left {
+            width: 0;
+            height: 0;
+            border-right: 60px solid #ffd900;
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+        }
+
+        #ctl_right {
+            height: 60px;
+            float: right;
+            margin-right: 30px;
+        }
+
+        /* 向右箭头 */
+        .to_right {
+            width: 0;
+            height: 0;
+            border-left: 60px solid greenyellow;
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+        }
+
+
+        #ctl_back_main {
+            margin-top: 90px;
+            align-content: center;
+        }
+
+        #ctl_back_left {
+            width: 60px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+            margin-left: 30px;
+            float: left;
+        }
+
+        /* 左下箭头 */
+        .to_bottom_left {
+            width: 0;
+            height: 0;
+            border-bottom: 30px solid skyblue;
+            border-left: 30px solid skyblue;
+            border-top: 30px solid transparent;
+            border-right: 30px solid transparent;
+        }
+
+        #ctl_back {
+            width: 120px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+            float: left;
+        }
+
+        /* 向下箭头 */
+        .to_bottom {
+            width: 0;
+            height: 0;
+            border-top: 60px solid skyblue;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+        }
+
+        #ctl_back_right {
+            width: 60px;
+            height: 60px;
+            margin: auto;
+            margin-bottom: 30px;
+            margin-right: 30px;
+            float: right;
+        }
+
+        /* 右下箭头 */
+        .to_bottom_right {
+            width: 0;
+            height: 0;
+            border-bottom: 30px solid skyblue;
+            border-right: 30px solid skyblue;
+            border-left: 30px solid transparent;
+            border-top: 30px solid transparent;
+        }
+
+        #messages {
+            margin: auto;
+            align-content: center;
+        }
+
+        #showmessages {
+            height: 200px;
+            width: 100%;
+        }
+
+        .msg_connect button {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div id="vvv">
+            <!-- <img id="stream" src="http://192.168.155.238:81/stream"> -->
+            <!-- <img id="stream" src="http://192.168.5.1:81/stream"> -->
+        </div>
+        <div id="ctl">
+            <div class="box">
+                <div id="ctl_go_main">
+                    <div id="ctl_go_left">
+                        <div class="to_top_left"></div>
+                    </div>
+                    <div id="ctl_go">
+                        <div class="to_top"></div>
+                    </div>
+                    <div id="ctl_go_right">
+                        <div class="to_top_right"></div>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+                <div id="ctl_min">
+                    <div id="ctl_left">
+                        <div class="to_left"></div>
+                    </div>
+                    <div id="ctl_right">
+                        <div class="to_right"></div>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+                <div id="ctl_back_main">
+                    <div id="ctl_back_left">
+                        <div class="to_bottom_left"></div>
+                    </div>
+                    <div id="ctl_back">
+                        <div class="to_bottom"></div>
+                    </div>
+                    <div id="ctl_back_right">
+                        <div class="to_bottom_right"></div>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div id="messages">
+                <textarea id="showmessages"></textarea>
+                <div class="msg_connect">
+                    <button id="reconnect">重连</button>
+                    <button id="closeconnect">断开</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // document.ontouchstart = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.ontouchend = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.onclick = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        // document.ondblclick = function (e) {
+        //     e.preventDefault();
+        //     return false
+        // }
+        var $ = function (selector) { return document.querySelector(selector); };
+        $.urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results == null) { return null; }
+            else { return decodeURI(results[1]) || 0; }
+        }
+        function show(f, y) {
+            if (y == null) y = f;
+            $(f).style.display = y == f ? 'block' : 'none';
+        }
+        function hide(f) {
+            $(f).style.display = 'none';
+        }
+        function fetch(url, method, callback, time_out) {
+            var xhr = new XMLHttpRequest();
+            xhr.onloadend = function () {
+                callback(xhr.status, xhr.responseText);
+            }
+            xhr.ontimeout = function () {
+                callback(-1, null);
+            }
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.timeout = (time_out || 10) * 1000;
+            xhr.send();
+        }
+    </script>
+    <script>
+        function toLocaleTimeString() {
+            let now = new Date();
+            return ("" + now.getHours()).padStart(2, "0")
+                + ":" + ("" + now.getMinutes()).padStart(2, "0")
+                + ":" + ("" + now.getSeconds()).padStart(2, "0")
+                + "." + ("" + now.getMilliseconds()).padStart(3, "0");
+        }
+        function ArrayBufferUTF8ToStr(array) {
+            var out, i, len, c;
+            var char2, char3;
+            if (array instanceof ArrayBuffer) {
+                array = new Uint8Array(array);
+            }
+            out = "";
+            len = array.length;
+            i = 0;
+            while (i < len) {
+                c = array[i++];
+                switch (c >> 4) {
+                    case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+                        // 0xxxxxxx
+                        out += String.fromCharCode(c);
+                        break;
+                    case 12: case 13:
+                        // 110x xxxx   10xx xxxx
+                        char2 = array[i++];
+                        out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+                        break;
+                    case 14:
+                        // 1110 xxxx  10xx xxxx  10xx xxxx
+                        char2 = array[i++];
+                        char3 = array[i++];
+                        out += String.fromCharCode(((c & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            ((char3 & 0x3F) << 0));
+                        break;
+                }
+            }
+            return out;
+        }
+        function appendMsgs(textMsg) {
+            $("#showmessages").value = $("#showmessages").value + "\r\n" + toLocaleTimeString() + " " + textMsg
+            $("#showmessages").scrollTop = $("#showmessages").scrollHeight;
+        }
+        function appendSendMsgs(textMsg) { appendMsgs("【发送】" + textMsg) }
+        function appendRecMsgs(textMsg) { appendMsgs("【收到】" + textMsg) }
+        function sendMsg(ws, msg) {
+            if (!ws || !ws.readyState || ws.readyState != 1) {
+                console.log(toLocaleTimeString(), "ws is not open:", ws)
+                appendMsgs("ws is not open:" + ws)
+                return false;
+            }
+            ws.send(msg += "_" + toLocaleTimeString())
+            appendSendMsgs(msg)
+        }
+    </script>
+    <script>
+        var interval2PingIns = 0
+        var interval2ActionIns = 0
+        var interval2ActionIns_delay = 100//ms
+        var timeout2StopIns = 0
+        var timeout2StopIns_delay = 700//ms
+        function tcpSocket(url) {
+            console.log(toLocaleTimeString(), "connecting to " + url)
+            appendMsgs("connecting to " + url)
+            let connection = new WebSocket(url);
+            connection.onerror = function (event) {
+                console.error(toLocaleTimeString(), connection, 'onError', event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+            }
+            connection.onopen = function (event) {
+                console.warn(toLocaleTimeString(), connection, 'onOpen', event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+                clearInterval(interval2PingIns)
+                interval2PingIns = setInterval(function () { sendMsg(connection, "ping_" + new Date().valueOf()); }, 5000)
+            }
+            connection.onmessage = function (event) {
+                let now = new Date().valueOf();
+                let rec = event.data;//ArrayBufferUTF8ToStr(event.data)
+                if (rec.startsWith("ping_")) {
+                    let ts = rec.replace("ping_", "").split("_")
+                    let diff = now - parseInt(ts[0])
+                    console.info(toLocaleTimeString(), connection, 'onMessage', event, "fps:" + diff + ", handle:" + ts[1])
+                    appendRecMsgs("fps:" + diff + ", handle:" + ts[2])
+                    return
+                }
+                console.info(toLocaleTimeString(), connection, 'onMessage', event, rec)
+                appendRecMsgs(rec)
+            }
+            connection.onclose = function (event) {
+                clearInterval(interval2PingIns)
+                console.warn(toLocaleTimeString(), connection, "onClose", event)
+                appendMsgs("【事件】" + event.type + ":" + JSON.stringify(event))
+            }
+            return connection
+        }
+        function stopFun(ws) {
+            clearTimeout(timeout2StopIns)
+            clearInterval(interval2ActionIns)
+            console.log(toLocaleTimeString(), "stopFun call")
+            appendMsgs("stopFun call")
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            sendMsg(ws, "go_0_0_0_0")
+        }
+        function touchStartFun(ws, act) {
+            clearTimeout(timeout2StopIns)
+            clearInterval(interval2ActionIns)
+            console.log(toLocaleTimeString(), ws, "touchStartFun call", act)
+            appendMsgs("touchStartFun call:" + act)
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            let right_go_min = "0_600"
+            let right_go_max = "0_1023"
+            let right_ba_min = "600_0"
+            let right_ba_max = "1023_0"
+            let right_stop = "0_0"
+            let left_go_min = "0_600"
+            let left_go_max = "0_1023"
+            let left_ba_min = "600_0"
+            let left_ba_max = "1023_0"
+            let left_stop = "0_0"
+            //go_{top_right_duty}_{bottom_right_duty}_{top_left_duty}_{bottom_left_duty}
+            let go_act = "go_0_0_0_0"
+            switch (act) {
+                case "go":
+                    go_act = "go_" + right_go_max + "_" + left_go_max
+                    break;
+                case "go_left":
+                    go_act = "go_" + right_go_max + "_" + left_go_min
+                    break;
+                case "go_right":
+                    go_act = "go_" + right_go_min + "_" + left_go_max
+                    break;
+                case "left":
+                    go_act = "go_" + right_go_max + "_" + left_ba_min
+                    break;
+                case "right":
+                    go_act = "go_" + right_ba_min + "_" + left_go_max
+                    break;
+                case "back":
+                    go_act = "go_" + right_ba_max + "_" + left_ba_max
+                    break;
+                case "back_left":
+                    go_act = "go_" + right_ba_max + "_" + left_ba_min
+                    break;
+                case "back_right":
+                    go_act = "go_" + right_ba_min + "_" + left_ba_max
+                    break;
+                default:
+                    go_act = "go_0_0_0_0"
+            }
+            let go_fun = function (ws, go_act) {
+                if (!ws || ws.readyState != 1) {
+                    clearInterval(interval2ActionIns)
+                    return
+                }
+                sendMsg(ws, go_act)
+            }
+            go_fun(ws, go_act)
+            interval2ActionIns = setInterval(function (ws, go_act) {
+                go_fun(ws, go_act)
+            }, interval2ActionIns_delay, ws, go_act)
+        }
+        function touchEndFun(ws) {
+            clearTimeout(timeout2StopIns)
+            console.log(toLocaleTimeString(), "touchEndFun call")
+            appendMsgs("touchEndFun call")
+            if (!ws || ws.readyState != 1) {
+                return
+            }
+            timeout2StopIns = setTimeout(function (ws) {
+                stopFun(ws)
+            }, timeout2StopIns_delay, ws)
+        }
+
+        var ws
+        var url
+        url = 'ws://192.168.155.254:9998/'
+        url = 'ws://192.168.4.1:9998/'
+        url = 'ws://192.168.5.5:9998/'
+        window.onload = function () {
+            try {
+                ws = tcpSocket(url)
+                console.log(toLocaleTimeString(), "tcpSocket", ws)
+                appendMsgs("onload tcpSocket")
+            } catch (err) {
+                console.log(toLocaleTimeString(), "tcpSocket err", err)
+                appendMsgs("onload tcpSocket err:" + err.message)
+            }
+        }
+        var to_top_left_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "go_left")
+            return false
+        }
+        var to_top_left_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_top_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "go")
+            return false
+        }
+        var to_top_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_top_right_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "go_right")
+            return false
+        }
+        var to_top_right_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_left_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "left")
+            return false
+        }
+        var to_left_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_right_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "right")
+            return false
+        }
+        var to_right_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_bottom_left_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "back_left")
+            return false
+        }
+        var to_bottom_left_ontouchend = function (evt) {
+            evt.preventDefault();
+            touchEndFun(ws)
+            return false
+        }
+        var to_bottom_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "back")
+            return false
+        }
+        var to_bottom_ontouchend = function (evt) {
+            evt.preventDefault();
+            stopFun(ws)
+            return false
+        }
+        var to_bottom_right_ontouchstart = function (evt) {
+            evt.preventDefault();
+            touchStartFun(ws, "back_right")
+            return false
+        }
+        var to_bottom_right_ontouchend = function (evt) {
+            evt.preventDefault();
+            stopFun(ws)
+            return false
+        }
+        $(".to_top_left").ontouchstart = to_top_left_ontouchstart
+        $(".to_top_left").ontouchend = to_top_left_ontouchend
+        $(".to_top").ontouchstart = to_top_ontouchstart
+        $(".to_top").ontouchend = to_top_ontouchend
+        $(".to_top_right").ontouchstart = to_top_right_ontouchstart
+        $(".to_top_right").ontouchend = to_top_right_ontouchend
+        $(".to_left").ontouchstart = to_left_ontouchstart
+        $(".to_left").ontouchend = to_left_ontouchend
+        $(".to_right").ontouchstart = to_right_ontouchstart
+        $(".to_right").ontouchend = to_right_ontouchend
+        $(".to_bottom_left").ontouchstart = to_bottom_left_ontouchstart
+        $(".to_bottom_left").ontouchend = to_bottom_left_ontouchend
+        $(".to_bottom").ontouchstart = to_bottom_ontouchstart
+        $(".to_bottom").ontouchend = to_bottom_ontouchend
+        $(".to_bottom_right").ontouchstart = to_bottom_right_ontouchstart
+        $(".to_bottom_right").ontouchend = to_bottom_right_ontouchend
+        $("#reconnect").ontouchstart = function () {
+            stopFun(ws)
+            ws.close()
+            ws.onclose({type:"主动重连"})
+            if (ws && ws.readyState == 1) {
+                return
+            }
+            ws = tcpSocket(url)
+            console.log(toLocaleTimeString(), "refresh", ws)
+        }
+        $("#closeconnect").ontouchstart = function () {
+            if (ws && ws.readyState == 1) {
+                ws.close()
+                ws.onclose({type:"主动断开"})
+            }
+        }
+    </script>
+</body>
+
+</html>
