@@ -14,16 +14,21 @@
 -- Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
 -- ]==]
 
-local left_pin = 5
-pwm.setup(left_pin, 1000, 0)
-pwm.stop(left_pin)
-local left_duty = 1000
-pwm.setup(left_pin, 1000, left_duty)
-pwm.start(left_pin)
+-- b1,6
+local top_right_pin = 6;local top_right_duty = 0;
 
-local right_pin = 6
-pwm.setup(right_pin, 1000, 0)
-pwm.stop(right_pin)
-local right_duty = 0
-pwm.setup(right_pin, 1000, right_duty)
-pwm.start(right_pin)
+-- a1,8
+local bottom_right_pin = 8;local bottom_right_duty = 0;
+
+
+-- b2,7
+local top_left_pin = 7;local top_left_duty = 0;
+
+-- a2,5
+local bottom_left_pin = 5;local bottom_left_duty = 0;
+
+
+pwm.setup(6, 1000, 0);pwm.start(6);pwm.setup(8, 1000, 0);pwm.start(8);
+pwm.setduty(6, 0);pwm.setduty(8, 0);
+pwm.setup(7, 1000, 0);pwm.start(7);pwm.setup(5, 1000, 0);pwm.start(5);
+pwm.setduty(7, 0);pwm.setduty(5, 0);

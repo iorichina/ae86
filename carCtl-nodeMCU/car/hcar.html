@@ -371,7 +371,7 @@
         var interval2ActionIns = 0
         var interval2ActionIns_delay = 100//ms
         var timeout2StopIns = 0
-        var timeout2StopIns_delay = 700//ms
+        var timeout2StopIns_delay = 100//ms
         function tcpSocket(url) {
             console.log(toLocaleTimeString(), "connecting to " + url)
             appendMsgs("connecting to " + url)
@@ -424,15 +424,15 @@
             if (!ws || ws.readyState != 1) {
                 return
             }
-            let right_go_min = "0_600"
-            let right_go_max = "0_1023"
-            let right_ba_min = "600_0"
-            let right_ba_max = "1023_0"
+            let right_go_min = "0_0"
+            let right_go_max = "1023_0"
+            let right_ba_min = "0_0"
+            let right_ba_max = "0_1023"
             let right_stop = "0_0"
-            let left_go_min = "0_600"
-            let left_go_max = "0_1023"
-            let left_ba_min = "600_0"
-            let left_ba_max = "1023_0"
+            let left_go_min = "0_0"
+            let left_go_max = "1023_0"
+            let left_ba_min = "0_0"
+            let left_ba_max = "0_1023"
             let left_stop = "0_0"
             //go_{top_right_duty}_{bottom_right_duty}_{top_left_duty}_{bottom_left_duty}
             let go_act = "go_0_0_0_0"

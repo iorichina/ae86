@@ -101,35 +101,35 @@ local start = function(t_start)
     -- b1,6
     local top_right_pin = 6
     local top_right_duty = 0
-    pwm.setup(top_right_pin, 1000, top_right_duty)
+    -- pwm.setup(top_right_pin, 1000, top_right_duty)
     -- a1,8
     local bottom_right_pin = 8
     local bottom_right_duty = 0
-    pwm.setup(bottom_right_pin, 1000, bottom_right_duty)
+    -- pwm.setup(bottom_right_pin, 1000, bottom_right_duty)
 
     -- b2,7
     local top_left_pin = 7
     local top_left_duty = 0
-    pwm.setup(top_left_pin, 1000, top_left_duty)
+    -- pwm.setup(top_left_pin, 1000, top_left_duty)
     -- a2,5
     local bottom_left_pin = 5
     local bottom_left_duty = 0
-    pwm.setup(bottom_left_pin, 1000, bottom_left_duty)
+    -- pwm.setup(bottom_left_pin, 1000, bottom_left_duty)
 
     local function startPwm()
-        pwm.start(top_right_pin)
+        -- pwm.start(top_right_pin)
         pwm.setduty(top_right_pin, top_right_duty)
         applog.print("start pwm top_right:", top_right_pin, ", duty is ", top_right_duty)
 
-        pwm.start(bottom_right_pin)
+        -- pwm.start(bottom_right_pin)
         pwm.setduty(bottom_right_pin, bottom_right_duty)
         applog.print("start pwm bottom_right:", bottom_right_pin, ", duty is ", bottom_right_duty)
 
-        pwm.start(top_left_pin)
+        -- pwm.start(top_left_pin)
         pwm.setduty(top_left_pin, top_left_duty)
         applog.print("start pwm top_left:", top_left_pin, ", duty is ", top_left_duty)
 
-        pwm.start(bottom_left_pin)
+        -- pwm.start(bottom_left_pin)
         pwm.setduty(bottom_left_pin, bottom_left_duty)
         applog.print("start pwm bottom_left:", bottom_left_pin, ", duty is ", bottom_left_duty)
     end
@@ -137,19 +137,19 @@ local start = function(t_start)
     local function stopPwm()
         top_right_duty = 0
         pwm.setduty(top_right_pin, top_right_duty)
-        pwm.stop(top_right_pin)
+        -- pwm.stop(top_right_pin)
 
         bottom_right_duty = 0
         pwm.setduty(bottom_right_pin, bottom_right_duty)
-        pwm.stop(bottom_right_pin)
+        -- pwm.stop(bottom_right_pin)
 
         top_left_duty = 0
         pwm.setduty(top_left_pin, top_left_duty)
-        pwm.stop(top_left_pin)
+        -- pwm.stop(top_left_pin)
 
         bottom_left_duty = 0
         pwm.setduty(bottom_left_pin, bottom_left_duty)
-        pwm.stop(bottom_left_pin)
+        -- pwm.stop(bottom_left_pin)
 
         applog.print("stop pwm top_right:", top_right_pin, " and bottom_right:", bottom_right_pin, " and top_left:", top_left_pin, " and bottom_left:", bottom_left_pin)
     end
