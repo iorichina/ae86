@@ -21,6 +21,8 @@
 #include "wifi_config.h"
 
 void startCameraServer();
+void sd_init();
+int psram_init();
 
 void setup()
 {

@@ -1,0 +1,317 @@
+##############################################################
+
+
+
+esp32miniblack.name=HK ESP32-MiniKIT(BLACK)
+
+esp32miniblack.upload.tool=esptool_py
+esp32miniblack.upload.maximum_size=1310720
+esp32miniblack.upload.maximum_data_size=327680
+esp32miniblack.upload.wait_for_upload_port=true
+
+esp32miniblack.serial.disableDTR=true
+esp32miniblack.serial.disableRTS=true
+
+esp32miniblack.build.mcu=esp32
+esp32miniblack.build.core=esp32
+esp32miniblack.build.variant=esp32
+esp32miniblack.build.board=ESP32_DEV
+
+esp32miniblack.build.f_cpu=240000000L
+esp32miniblack.build.flash_size=4MB
+esp32miniblack.build.flash_freq=40m
+esp32miniblack.build.flash_mode=dio
+esp32miniblack.build.boot=dio
+esp32miniblack.build.partitions=default
+esp32miniblack.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+
+esp32miniblack.menu.PartitionScheme.default=Huge APP (3MB No OTA/1MB SPIFFS)
+esp32miniblack.menu.PartitionScheme.default.build.partitions=default
+esp32miniblack.menu.PartitionScheme.defaultffat=Default 4MB with ffat (1.2MB APP/1.5MB FATFS)
+esp32miniblack.menu.PartitionScheme.defaultffat.build.partitions=default_ffat
+esp32miniblack.menu.PartitionScheme.default_8MB=8M Flash (3MB APP/1.5MB FAT)
+esp32miniblack.menu.PartitionScheme.default_8MB.build.partitions=default_8MB
+esp32miniblack.menu.PartitionScheme.minimal=Minimal (1.3MB APP/700KB SPIFFS)
+esp32miniblack.menu.PartitionScheme.minimal.build.partitions=minimal
+esp32miniblack.menu.PartitionScheme.no_ota=No OTA (2MB APP/2MB SPIFFS)
+esp32miniblack.menu.PartitionScheme.no_ota.build.partitions=no_ota
+esp32miniblack.menu.PartitionScheme.no_ota.upload.maximum_size=2097152
+esp32miniblack.menu.PartitionScheme.noota_3g=No OTA (1MB APP/3MB SPIFFS)
+esp32miniblack.menu.PartitionScheme.noota_3g.build.partitions=noota_3g
+esp32miniblack.menu.PartitionScheme.noota_3g.upload.maximum_size=1048576
+esp32miniblack.menu.PartitionScheme.noota_ffat=No OTA (2MB APP/2MB FATFS)
+esp32miniblack.menu.PartitionScheme.noota_ffat.build.partitions=noota_ffat
+esp32miniblack.menu.PartitionScheme.noota_ffat.upload.maximum_size=2097152
+esp32miniblack.menu.PartitionScheme.noota_3gffat=No OTA (1MB APP/3MB FATFS)
+esp32miniblack.menu.PartitionScheme.noota_3gffat.build.partitions=noota_3gffat
+esp32miniblack.menu.PartitionScheme.noota_3gffat.upload.maximum_size=1048576
+esp32miniblack.menu.PartitionScheme.huge_app=Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)
+esp32miniblack.menu.PartitionScheme.huge_app.build.partitions=huge_app
+esp32miniblack.menu.PartitionScheme.huge_app.upload.maximum_size=3145728
+esp32miniblack.menu.PartitionScheme.min_spiffs=Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS)
+esp32miniblack.menu.PartitionScheme.min_spiffs.build.partitions=min_spiffs
+esp32miniblack.menu.PartitionScheme.min_spiffs.upload.maximum_size=1966080
+esp32miniblack.menu.PartitionScheme.fatflash=16M Flash (2MB APP/12.5MB FAT)
+esp32miniblack.menu.PartitionScheme.fatflash.build.partitions=ffat
+
+esp32miniblack.menu.FlashMode.qio=QIO
+esp32miniblack.menu.FlashMode.qio.build.flash_mode=dio
+esp32miniblack.menu.FlashMode.qio.build.boot=qio
+esp32miniblack.menu.FlashMode.dio=DIO
+esp32miniblack.menu.FlashMode.dio.build.flash_mode=dio
+esp32miniblack.menu.FlashMode.dio.build.boot=dio
+esp32miniblack.menu.FlashMode.qout=QOUT
+esp32miniblack.menu.FlashMode.qout.build.flash_mode=dout
+esp32miniblack.menu.FlashMode.qout.build.boot=qout
+esp32miniblack.menu.FlashMode.dout=DOUT
+esp32miniblack.menu.FlashMode.dout.build.flash_mode=dout
+esp32miniblack.menu.FlashMode.dout.build.boot=dout
+
+esp32miniblack.menu.FlashFreq.80=80MHz
+esp32miniblack.menu.FlashFreq.80.build.flash_freq=80m
+esp32miniblack.menu.FlashFreq.40=40MHz
+esp32miniblack.menu.FlashFreq.40.build.flash_freq=40m
+
+esp32miniblack.menu.UploadSpeed.921600=921600
+esp32miniblack.menu.UploadSpeed.921600.upload.speed=921600
+esp32miniblack.menu.UploadSpeed.115200=115200
+esp32miniblack.menu.UploadSpeed.115200.upload.speed=115200
+esp32miniblack.menu.UploadSpeed.256000.windows=256000
+esp32miniblack.menu.UploadSpeed.256000.upload.speed=256000
+esp32miniblack.menu.UploadSpeed.230400.windows.upload.speed=256000
+esp32miniblack.menu.UploadSpeed.230400=230400
+esp32miniblack.menu.UploadSpeed.230400.upload.speed=230400
+esp32miniblack.menu.UploadSpeed.460800.linux=460800
+esp32miniblack.menu.UploadSpeed.460800.macosx=460800
+esp32miniblack.menu.UploadSpeed.460800.upload.speed=460800
+esp32miniblack.menu.UploadSpeed.512000.windows=512000
+esp32miniblack.menu.UploadSpeed.512000.upload.speed=512000
+
+esp32miniblack.menu.DebugLevel.none=None
+esp32miniblack.menu.DebugLevel.none.build.code_debug=0
+esp32miniblack.menu.DebugLevel.error=Error
+esp32miniblack.menu.DebugLevel.error.build.code_debug=1
+esp32miniblack.menu.DebugLevel.warn=Warn
+esp32miniblack.menu.DebugLevel.warn.build.code_debug=2
+esp32miniblack.menu.DebugLevel.info=Info
+esp32miniblack.menu.DebugLevel.info.build.code_debug=3
+esp32miniblack.menu.DebugLevel.debug=Debug
+esp32miniblack.menu.DebugLevel.debug.build.code_debug=4
+esp32miniblack.menu.DebugLevel.verbose=Verbose
+esp32miniblack.menu.DebugLevel.verbose.build.code_debug=5
+
+##############################################################
+
+esp32miniblue.name=HK ESP32-MiniKIT(BLUE)
+
+esp32miniblue.upload.tool=esptool_py
+esp32miniblue.upload.maximum_size=1310720
+esp32miniblue.upload.maximum_data_size=327680
+esp32miniblue.upload.wait_for_upload_port=true
+
+esp32miniblue.serial.disableDTR=true
+esp32miniblue.serial.disableRTS=true
+
+esp32miniblue.build.mcu=esp32
+esp32miniblue.build.core=esp32
+esp32miniblue.build.variant=esp32
+esp32miniblue.build.board=ESP32_DEV
+
+esp32miniblue.build.f_cpu=240000000L
+esp32miniblue.build.flash_size=4MB
+esp32miniblue.build.flash_freq=40m
+esp32miniblue.build.flash_mode=dio
+esp32miniblue.build.boot=dio
+esp32miniblue.build.partitions=default
+esp32miniblue.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+
+esp32miniblue.menu.PartitionScheme.default=Huge APP (3MB No OTA/1MB SPIFFS)
+esp32miniblue.menu.PartitionScheme.default.build.partitions=default
+esp32miniblue.menu.PartitionScheme.defaultffat=Default 4MB with ffat (1.2MB APP/1.5MB FATFS)
+esp32miniblue.menu.PartitionScheme.defaultffat.build.partitions=default_ffat
+esp32miniblue.menu.PartitionScheme.default_8MB=8M Flash (3MB APP/1.5MB FAT)
+esp32miniblue.menu.PartitionScheme.default_8MB.build.partitions=default_8MB
+esp32miniblue.menu.PartitionScheme.minimal=Minimal (1.3MB APP/700KB SPIFFS)
+esp32miniblue.menu.PartitionScheme.minimal.build.partitions=minimal
+esp32miniblue.menu.PartitionScheme.no_ota=No OTA (2MB APP/2MB SPIFFS)
+esp32miniblue.menu.PartitionScheme.no_ota.build.partitions=no_ota
+esp32miniblue.menu.PartitionScheme.no_ota.upload.maximum_size=2097152
+esp32miniblue.menu.PartitionScheme.noota_3g=No OTA (1MB APP/3MB SPIFFS)
+esp32miniblue.menu.PartitionScheme.noota_3g.build.partitions=noota_3g
+esp32miniblue.menu.PartitionScheme.noota_3g.upload.maximum_size=1048576
+esp32miniblue.menu.PartitionScheme.noota_ffat=No OTA (2MB APP/2MB FATFS)
+esp32miniblue.menu.PartitionScheme.noota_ffat.build.partitions=noota_ffat
+esp32miniblue.menu.PartitionScheme.noota_ffat.upload.maximum_size=2097152
+esp32miniblue.menu.PartitionScheme.noota_3gffat=No OTA (1MB APP/3MB FATFS)
+esp32miniblue.menu.PartitionScheme.noota_3gffat.build.partitions=noota_3gffat
+esp32miniblue.menu.PartitionScheme.noota_3gffat.upload.maximum_size=1048576
+esp32miniblue.menu.PartitionScheme.huge_app=Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)
+esp32miniblue.menu.PartitionScheme.huge_app.build.partitions=huge_app
+esp32miniblue.menu.PartitionScheme.huge_app.upload.maximum_size=3145728
+esp32miniblue.menu.PartitionScheme.min_spiffs=Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS)
+esp32miniblue.menu.PartitionScheme.min_spiffs.build.partitions=min_spiffs
+esp32miniblue.menu.PartitionScheme.min_spiffs.upload.maximum_size=1966080
+esp32miniblue.menu.PartitionScheme.fatflash=16M Flash (2MB APP/12.5MB FAT)
+esp32miniblue.menu.PartitionScheme.fatflash.build.partitions=ffat
+
+esp32miniblue.menu.FlashMode.qio=QIO
+esp32miniblue.menu.FlashMode.qio.build.flash_mode=dio
+esp32miniblue.menu.FlashMode.qio.build.boot=qio
+esp32miniblue.menu.FlashMode.dio=DIO
+esp32miniblue.menu.FlashMode.dio.build.flash_mode=dio
+esp32miniblue.menu.FlashMode.dio.build.boot=dio
+esp32miniblue.menu.FlashMode.qout=QOUT
+esp32miniblue.menu.FlashMode.qout.build.flash_mode=dout
+esp32miniblue.menu.FlashMode.qout.build.boot=qout
+esp32miniblue.menu.FlashMode.dout=DOUT
+esp32miniblue.menu.FlashMode.dout.build.flash_mode=dout
+esp32miniblue.menu.FlashMode.dout.build.boot=dout
+
+esp32miniblue.menu.FlashFreq.80=80MHz
+esp32miniblue.menu.FlashFreq.80.build.flash_freq=80m
+esp32miniblue.menu.FlashFreq.40=40MHz
+esp32miniblue.menu.FlashFreq.40.build.flash_freq=40m
+
+esp32miniblue.menu.UploadSpeed.921600=921600
+esp32miniblue.menu.UploadSpeed.921600.upload.speed=921600
+esp32miniblue.menu.UploadSpeed.115200=115200
+esp32miniblue.menu.UploadSpeed.115200.upload.speed=115200
+esp32miniblue.menu.UploadSpeed.256000.windows=256000
+esp32miniblue.menu.UploadSpeed.256000.upload.speed=256000
+esp32miniblue.menu.UploadSpeed.230400.windows.upload.speed=256000
+esp32miniblue.menu.UploadSpeed.230400=230400
+esp32miniblue.menu.UploadSpeed.230400.upload.speed=230400
+esp32miniblue.menu.UploadSpeed.460800.linux=460800
+esp32miniblue.menu.UploadSpeed.460800.macosx=460800
+esp32miniblue.menu.UploadSpeed.460800.upload.speed=460800
+esp32miniblue.menu.UploadSpeed.512000.windows=512000
+esp32miniblue.menu.UploadSpeed.512000.upload.speed=512000
+
+esp32miniblue.menu.DebugLevel.none=None
+esp32miniblue.menu.DebugLevel.none.build.code_debug=0
+esp32miniblue.menu.DebugLevel.error=Error
+esp32miniblue.menu.DebugLevel.error.build.code_debug=1
+esp32miniblue.menu.DebugLevel.warn=Warn
+esp32miniblue.menu.DebugLevel.warn.build.code_debug=2
+esp32miniblue.menu.DebugLevel.info=Info
+esp32miniblue.menu.DebugLevel.info.build.code_debug=3
+esp32miniblue.menu.DebugLevel.debug=Debug
+esp32miniblue.menu.DebugLevel.debug.build.code_debug=4
+esp32miniblue.menu.DebugLevel.verbose=Verbose
+esp32miniblue.menu.DebugLevel.verbose.build.code_debug=5
+
+##############################################################
+
+esp32cammb.name=HK ESP32-CAM-MB
+
+esp32cammb.upload.tool=esptool_py
+esp32cammb.upload.maximum_size=3145728
+esp32cammb.upload.maximum_data_size=327680
+esp32cammb.upload.wait_for_upload_port=true
+esp32cammb.upload.speed=460800
+
+esp32cammb.serial.disableDTR=true
+esp32cammb.serial.disableRTS=true
+
+esp32cammb.build.mcu=esp32
+esp32cammb.build.core=esp32
+esp32cammb.build.variant=esp32
+esp32cammb.build.board=ESP32_DEV
+esp32cammb.build.flash_size=4MB
+esp32cammb.build.partitions=huge_app
+esp32cammb.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+esp32cammb.build.code_debug=0
+
+esp32cammb.menu.CPUFreq.240=240MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.240.build.f_cpu=240000000L
+esp32cammb.menu.CPUFreq.160=160MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.160.build.f_cpu=160000000L
+esp32cammb.menu.CPUFreq.80=80MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.80.build.f_cpu=80000000L
+esp32cammb.menu.CPUFreq.40=40MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.40.build.f_cpu=40000000L
+esp32cammb.menu.CPUFreq.26=26MHz (26MHz XTAL)
+esp32cammb.menu.CPUFreq.26.build.f_cpu=26000000L
+esp32cammb.menu.CPUFreq.20=20MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.20.build.f_cpu=20000000L
+esp32cammb.menu.CPUFreq.13=13MHz (26MHz XTAL)
+esp32cammb.menu.CPUFreq.13.build.f_cpu=13000000L
+esp32cammb.menu.CPUFreq.10=10MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.10.build.f_cpu=10000000L
+
+esp32cammb.menu.FlashMode.qio=QIO
+esp32cammb.menu.FlashMode.qio.build.flash_mode=dio
+esp32cammb.menu.FlashMode.qio.build.boot=qio
+esp32cammb.menu.FlashMode.dio=DIO
+esp32cammb.menu.FlashMode.dio.build.flash_mode=dio
+esp32cammb.menu.FlashMode.dio.build.boot=dio
+esp32cammb.menu.FlashMode.qout=QOUT
+esp32cammb.menu.FlashMode.qout.build.flash_mode=dout
+esp32cammb.menu.FlashMode.qout.build.boot=qout
+esp32cammb.menu.FlashMode.dout=DOUT
+esp32cammb.menu.FlashMode.dout.build.flash_mode=dout
+esp32cammb.menu.FlashMode.dout.build.boot=dout
+
+esp32cammb.menu.FlashFreq.80=80MHz
+esp32cammb.menu.FlashFreq.80.build.flash_freq=80m
+esp32cammb.menu.FlashFreq.40=40MHz
+esp32cammb.menu.FlashFreq.40.build.flash_freq=40m
+
+##############################################################
+
+esp32cam.name=HK ESP32-CAM
+
+esp32cam.upload.tool=esptool_py
+esp32cam.upload.maximum_size=3145728
+esp32cam.upload.maximum_data_size=327680
+esp32cam.upload.wait_for_upload_port=true
+esp32cam.upload.speed=460800
+
+esp32cam.serial.disableDTR=true
+esp32cam.serial.disableRTS=true
+
+esp32cam.build.mcu=esp32
+esp32cam.build.core=esp32
+esp32cam.build.variant=esp32
+esp32cam.build.board=ESP32_DEV
+esp32cam.build.flash_size=4MB
+esp32cam.build.partitions=huge_app
+esp32cam.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+esp32cam.build.code_debug=0
+
+esp32cam.menu.CPUFreq.240=240MHz (WiFi/BT)
+esp32cam.menu.CPUFreq.240.build.f_cpu=240000000L
+esp32cam.menu.CPUFreq.160=160MHz (WiFi/BT)
+esp32cam.menu.CPUFreq.160.build.f_cpu=160000000L
+esp32cam.menu.CPUFreq.80=80MHz (WiFi/BT)
+esp32cam.menu.CPUFreq.80.build.f_cpu=80000000L
+esp32cam.menu.CPUFreq.40=40MHz (40MHz XTAL)
+esp32cam.menu.CPUFreq.40.build.f_cpu=40000000L
+esp32cam.menu.CPUFreq.26=26MHz (26MHz XTAL)
+esp32cam.menu.CPUFreq.26.build.f_cpu=26000000L
+esp32cam.menu.CPUFreq.20=20MHz (40MHz XTAL)
+esp32cam.menu.CPUFreq.20.build.f_cpu=20000000L
+esp32cam.menu.CPUFreq.13=13MHz (26MHz XTAL)
+esp32cam.menu.CPUFreq.13.build.f_cpu=13000000L
+esp32cam.menu.CPUFreq.10=10MHz (40MHz XTAL)
+esp32cam.menu.CPUFreq.10.build.f_cpu=10000000L
+
+esp32cam.menu.FlashMode.qio=QIO
+esp32cam.menu.FlashMode.qio.build.flash_mode=dio
+esp32cam.menu.FlashMode.qio.build.boot=qio
+esp32cam.menu.FlashMode.dio=DIO
+esp32cam.menu.FlashMode.dio.build.flash_mode=dio
+esp32cam.menu.FlashMode.dio.build.boot=dio
+esp32cam.menu.FlashMode.qout=QOUT
+esp32cam.menu.FlashMode.qout.build.flash_mode=dout
+esp32cam.menu.FlashMode.qout.build.boot=qout
+esp32cam.menu.FlashMode.dout=DOUT
+esp32cam.menu.FlashMode.dout.build.flash_mode=dout
+esp32cam.menu.FlashMode.dout.build.boot=dout
+
+esp32cam.menu.FlashFreq.80=80MHz
+esp32cam.menu.FlashFreq.80.build.flash_freq=80m
+esp32cam.menu.FlashFreq.40=40MHz
+esp32cam.menu.FlashFreq.40.build.flash_freq=40m
+
+##############################################################

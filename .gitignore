@@ -31,8 +31,6 @@
 *.out
 *.app
 
-.vscode
-
 .gitee
 .vscode
 wifi_config.h

@@ -1,47 +1,69 @@
 # ae86
 
-## 介绍
+## 1、介绍
 自研小车，包括控制芯片程序、摄像头程序、硬件组装方法等
 
-## 软件架构
+## 2、软件架构
 软件架构说明
 
 
-## 安装教程
+## 3、Arduino使用说明
 
-### 1.  摄像头
-* 开发板
-ESP32-CAM
+### （1）摄像头开发板
+1.  开发板类型 ESP32-CAM
+2.  工具->开发板 ESP32 Arduino -> HK ESP32-CAM-MB
+3.  ESP32-D0WDQ6 (revision 1)
+4.  Features: WiFi, BT, Dual Core, 240MHz
+5.  Crystal is 40MHz
+7.  Flash size: 4MB
+8.  baud rate 460800
 
-* Arduino IDE配置
 
-下载<link>链接：https://pan.baidu.com/s/11VeqqeqsaVGWoVlMKvHGPg?pwd=ij54</link>
+### （2）Arduino IDE配置
+1. 下载esp32开发板库
 
-解压到arduino安装目录的hardware下，具体板块信息可以在
-`hardware/espressif/esp32/README.md` ；
+下载链接：<link>https://pan.baidu.com/s/11VeqqeqsaVGWoVlMKvHGPg?pwd=ij54</link>
 
-或者git仓库下载<link>https://github.com/espressif/arduino-esp32</link>（v1.0.6支持win7）
+或者git仓库下载<link>https://github.com/espressif/arduino-esp32</link><pre>git checkout 1.0.6</pre>（v1.0.6支持win7）
 
-在hardware目录下新建`/hardware/espressif/esp32`，git仓库内容全部移动改目录下，然后在改目录中开启cmd，执行`git submodule update --init --recursive`，然后执行`/hardware/espressif/esp32/tools/get.exe`（需要python 3.8.x）
+2. 安装esp32开发库
 
-详细可以查看官方文档<link>https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html</link>
+esp32开发库安装目录为`arduino安装目录/hardware/`，
+或操作系统`文档/Arduino/hardware/`；
 
-* 在目录下新建 wifi_config.h
+下载压缩包解压到`开发库安装目录`即可；
+
+git仓库clone到`开发库安装目录/espressif/esp32/`，然后在该目录中开启cmd，执行
+```
+git submodule update --init --recursive
+cd tools
+.\get.exe
+```
+git仓库操作方法详细可以查看官方文档<link>https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html</link>
+
+
+## 4、开发目录说明
+
+### （1）carCtl-nodeMCU
+小车控制代码
+* wifi配置文件：carCtl-nodeMCU\car\start.lua
+* 修改WIFI的ssid和pwd 参数
+
+### （2）esp32Camera
+HTTP摄像头
+* wifi配置在目录下新建 wifi_config.h
 <pre>
 const char *sta_ssid = "******";
 const char *sta_password = "******";
 </pre>
-* Board Type
 
-ESP32 Arduino -> HK ESP32-CAM-MB
-* 
-1.  xxxx
-2.  xxxx
+### （3）ESP32cam-rtsp
+RTSP和HTTP摄像头
+* wifi配置在目录下新建 wifikeys.h
+<pre>
+const char *sta_ssid = "******";
+const char *sta_password = "******";
+const char *ap_ssid = "******";
+const char *ap_password = "******";
+</pre>
 
-
-
-### 2.  摄像头
-
-#### 连接WIFI
-* 文件：carCtl-nodeMCU\car\init.lua
-* 修改WIFI的ssid和pwd 参数；

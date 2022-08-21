@@ -14,9 +14,11 @@
 //
 #define CAMERA_MODEL_HONGKE // Has PSRAM
 #include "camera_pins.h"
+void sd_init();
+int psram_init();
 
 // #define ENABLE_OLED //if want use oled ,turn on thi macro
-//#define SOFTAP_MODE // If you want to run our own softap turn this on
+#define SOFTAP_MODE // If you want to run our own softap turn this on
 #include "wifikeys.h"
 
 #define ENABLE_WEBSERVER
