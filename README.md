@@ -9,17 +9,7 @@
 
 ## 3、Arduino使用说明
 
-### （1）摄像头开发板
-1.  开发板类型 ESP32-CAM
-2.  工具->开发板 ESP32 Arduino -> HK ESP32-CAM-MB
-3.  ESP32-D0WDQ6 (revision 1)
-4.  Features: WiFi, BT, Dual Core, 240MHz
-5.  Crystal is 40MHz
-7.  Flash size: 4MB
-8.  baud rate 460800
-
-
-### （2）Arduino IDE配置
+### （1）Arduino IDE配置
 1. 下载esp32开发板库
 
 下载链接：<link>https://pan.baidu.com/s/11VeqqeqsaVGWoVlMKvHGPg?pwd=ij54</link>
@@ -40,6 +30,21 @@ cd tools
 .\get.exe
 ```
 git仓库操作方法详细可以查看官方文档<link>https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html</link>
+
+### （2）摄像头开发板
+1.  开发板类型 ESP32-CAM
+2.  工具->开发板 ESP32 Arduino -> HK ESP32-CAM-MB
+3.  ESP32-D0WDQ6 (revision 1)
+4.  Features: WiFi, BT, Dual Core, 240MHz
+5.  Crystal is 40MHz
+7.  Flash size: 4MB
+8.  baud rate 460800
+
+### (3) MH-ET ESP32开发板（电压、红外）
+1. 开发板类型： ESP32 Dev Module
+2. 管脚：ESP32 DEVKIT PINOUT
+3. 模组：[ESP32-WROOM-32E](https://www.espressif.com.cn/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_cn.pdf")
+4. 
 
 
 ## 4、开发目录说明
