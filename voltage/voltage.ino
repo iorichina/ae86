@@ -3,8 +3,8 @@
 int val11;
 int val2;
 
-const int analogInPin = A7;        // 模拟输入引脚 35
-const int LED_PIN = 2;//LED_BUILTIN; // led连接到pwm输出引脚 2
+const int analogInPin = A0;//A7;        // 模拟输入引脚 
+const int LED_PIN = 13;//2;//LED_BUILTIN; // led连接到pwm输出引脚 2
 
 int sensorValue = 0; // 从引脚读到的值
 int outputValue = 0; //输出到pwm脚的值
@@ -14,7 +14,7 @@ void setup()
   // 设置引脚为模拟输入模式
   // pinMode(analogInPin, INPUT);
   // 设置led脚输出pwm模式
-  pinMode(LED_PIN, OUTPUT);
+  // pinMode(LED_PIN, OUTPUT);
 
   pinMode(LED_PIN, OUTPUT);    //配置GPIO2端口模式为输出模式
   digitalWrite(LED_PIN, HIGH); //配置GPIO2端口为高电平，灯亮
