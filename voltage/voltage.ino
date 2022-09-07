@@ -7,6 +7,10 @@ const int LED_PIN = 2;      // LED_BUILTIN; // led连接到pwm输出引脚
 const int analogInPin = A0; //       // 模拟输入引脚
 const int LED_PIN = 13;     // led连接到pwm输出引脚
 #endif
+// 给检测模块供电的电压，应通过万用表或其他工具测出实际值
+const int analogPinVoltage = 5.00; // maybe 4.72
+// 检测模块降压的倍数，官方宣称5倍，应实测后给出
+const int sensorModuleTimes = 5; // maybe 3.57328
 
 int sensorValue = 0; // 从引脚读到的值
 int outputValue = 0; //输出到pwm脚的值
@@ -28,7 +32,7 @@ void loop()
 {
   //读取模拟输入数值
   sensorValue = analogRead(analogInPin);
-  //maybe more stable when the analog pin is read twice
+  // maybe more stable when the analog pin is read twice
   sensorValue = analogRead(analogInPin);
   // 使用map函数把输入的数值进行映射
 #if defined(_STDINT_H)
@@ -41,11 +45,8 @@ void loop()
   Serial.print("\t mapper = ");
   Serial.print(outputValue);
   Serial.print("\t voltage = ");
-  outputValue = (int)((sensorValue + 1) * (5.00 * 5) * 100 / 4096);
+  outputValue = (int)(sensorValue * (analogPinVoltage * analogPinVoltage) * 100 / 4096);
   Serial.print(outputValue % 1000 / 100.0);
-  Serial.print("\t voltage = ");
-  outputValue = (int)((sensorValue + 1) * (4.72 * 5) * 100 / 4096);
-  Serial.println(outputValue % 1000 / 100.0);
 #else
   // arduino
   Serial.println("----Arduino----");
@@ -56,7 +57,7 @@ void loop()
   Serial.print("\t mapper = ");
   Serial.print(outputValue);
   Serial.print("\t voltage = ");
-  outputValue = (int)((sensorValue + 1) * (5.00 * 5) * 100 / 1024);
+  outputValue = (int)(sensorValue * (analogPinVoltage * analogPinVoltage) * 100 / 1024);
   Serial.println(outputValue % 1000 / 100.0);
 #endif
 
