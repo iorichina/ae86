@@ -1,3 +1,4 @@
+
 #if defined(_STDINT_H)
 // esp32
 const int analogInPin = A7;      // 35; 模拟输入引脚
@@ -9,13 +10,24 @@ const int analogInPin = A0;      // 模拟输入引脚
 const int LED_PIN = 13;          // led连接到pwm输出引脚
 const int sensorValueMax = 1023; // 10bit
 #endif
-// 给检测模块供电的电压（模拟电压：5V或3.3V），应通过万用表或其他工具测出实际值
-const float analogPinVoltage = 3.32; // maybe 4.72
-// 检测模块缩小电压的倍数，官方宣称5倍（比如模拟电压5V，检测模块的输入电压最大25V），应实测后给出
-const float sensorModuleTimes = 5.43; // maybe 5.09
 
-int sensorValue = 2933;   // 从引脚读到的值
-float outputValue = 12.1; //输出到pwm脚的值
+// 有些电压检测模块可以使用第三方供电电压，可以是第三方供电、单片机输出电压管脚供电
+// 如果自己拉电阻实现电压检测模块，就不需要额外供电了，也不需要定义宏
+// #define USE_INPUT_VOLTAGE
+
+#if defined(USE_INPUT_VOLTAGE)
+// 外部供电电压作为参考电压，也有可能是5v
+const float refVoltage = 3.32;
+#else
+// 单片机内部运行电压
+const float refVoltage = 5.00;
+#endif
+
+// 检测模块缩小电压的倍数，30KΩ和一个7.5K欧姆电阻实现缩小5倍（比如模拟电压5V，检测模块的输入电压最大25V），要是对电阻质量没信息，应实测后给出
+const float sensorModuleTimes = 1.0 / (7500.0 / (30000.0 + 7500.0)); // 5.00;// = 1/（R2 /（R1+R2））
+
+int sensorValue = 0;     // 从引脚读到的值
+float outputValue = 0.0; //输出到pwm脚的值
 
 void setup()
 {
@@ -47,8 +59,9 @@ void loop()
   Serial.print("sensor = ");
   Serial.print(sensorValue);
   Serial.print("\t voltage = ");
-  // 25=(4095-read/4095-max)*(5-pinV*5-times)
-  outputValue = ((float)sensorValue / sensorValueMax) * (analogPinVoltage * sensorModuleTimes);
+  // =（[数值]/4095）* [参考电压] / （R2 /（R1+R2））
+  // 25@max=(4095@read / 4095@max) * (5V * 5@times)
+  outputValue = ((float)sensorValue / sensorValueMax) * (refVoltage * sensorModuleTimes);
   Serial.println(outputValue);
 
   digitalWrite(LED_PIN, digitalRead(LED_PIN) ^ HIGH); //配置GPIO2端口为高电平，灯亮

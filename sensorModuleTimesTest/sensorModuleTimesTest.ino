@@ -10,7 +10,7 @@ const int LED_PIN = 13;          // led连接到pwm输出引脚
 const int sensorValueMax = 1023; // 10bit
 #endif
 // 给检测模块供电的电压（模拟电压：5V或3.3V），应通过万用表或其他工具测出实际值
-const float analogPinVoltage = 3.32; // maybe 4.72
+const float refVoltage = 3.32; // maybe 4.72
 // 检测模块缩小电压的倍数，官方宣称5倍（比如模拟电压5V，检测模块的输入电压最大25V），应实测后给出
 float sensorModuleTimes = 5.43; // maybe 5.09
 
@@ -47,7 +47,7 @@ void loop()
   Serial.print("sensor = ");
   Serial.print(sensorValue);
   Serial.print("\t times = ");
-  sensorModuleTimes = outputValue * sensorValueMax / sensorValue / analogPinVoltage;
+  sensorModuleTimes = outputValue * sensorValueMax / sensorValue / refVoltage;
   Serial.println(sensorModuleTimes);
 
   digitalWrite(LED_PIN, digitalRead(LED_PIN) ^ HIGH); //配置GPIO2端口为高电平，灯亮
