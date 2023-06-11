@@ -34,6 +34,73 @@ const char *sta_password = "******";
 * Board Type
 
 ESP32 Arduino -> HK ESP32-CAM-MB
+
+esp32包目录下的boards.txt 
+（如：C:\Users\Administrator\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.9\boards.txt，或者 C:\Users\Documents\Arduino\hardware\espressif\esp32\boards.txt）
+增加
+<code>
+
+##############################################################
+
+esp32cammb.name=HK ESP32-CAM-MB
+
+esp32cammb.upload.tool=esptool_py
+esp32cammb.upload.maximum_size=3145728
+esp32cammb.upload.maximum_data_size=327680
+esp32cammb.upload.wait_for_upload_port=true
+esp32cammb.upload.speed=460800
+
+esp32cammb.serial.disableDTR=true
+esp32cammb.serial.disableRTS=true
+
+esp32cammb.build.mcu=esp32
+esp32cammb.build.core=esp32
+esp32cammb.build.variant=esp32
+esp32cammb.build.board=ESP32_DEV
+esp32cammb.build.flash_size=4MB
+esp32cammb.build.partitions=huge_app
+esp32cammb.build.defines=-DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue
+esp32cammb.build.code_debug=0
+
+esp32cammb.menu.CPUFreq.240=240MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.240.build.f_cpu=240000000L
+esp32cammb.menu.CPUFreq.160=160MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.160.build.f_cpu=160000000L
+esp32cammb.menu.CPUFreq.80=80MHz (WiFi/BT)
+esp32cammb.menu.CPUFreq.80.build.f_cpu=80000000L
+esp32cammb.menu.CPUFreq.40=40MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.40.build.f_cpu=40000000L
+esp32cammb.menu.CPUFreq.26=26MHz (26MHz XTAL)
+esp32cammb.menu.CPUFreq.26.build.f_cpu=26000000L
+esp32cammb.menu.CPUFreq.20=20MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.20.build.f_cpu=20000000L
+esp32cammb.menu.CPUFreq.13=13MHz (26MHz XTAL)
+esp32cammb.menu.CPUFreq.13.build.f_cpu=13000000L
+esp32cammb.menu.CPUFreq.10=10MHz (40MHz XTAL)
+esp32cammb.menu.CPUFreq.10.build.f_cpu=10000000L
+
+esp32cammb.menu.FlashMode.qio=QIO
+esp32cammb.menu.FlashMode.qio.build.flash_mode=dio
+esp32cammb.menu.FlashMode.qio.build.boot=qio
+esp32cammb.menu.FlashMode.dio=DIO
+esp32cammb.menu.FlashMode.dio.build.flash_mode=dio
+esp32cammb.menu.FlashMode.dio.build.boot=dio
+esp32cammb.menu.FlashMode.qout=QOUT
+esp32cammb.menu.FlashMode.qout.build.flash_mode=dout
+esp32cammb.menu.FlashMode.qout.build.boot=qout
+esp32cammb.menu.FlashMode.dout=DOUT
+esp32cammb.menu.FlashMode.dout.build.flash_mode=dout
+esp32cammb.menu.FlashMode.dout.build.boot=dout
+
+esp32cammb.menu.FlashFreq.80=80MHz
+esp32cammb.menu.FlashFreq.80.build.flash_freq=80m
+esp32cammb.menu.FlashFreq.40=40MHz
+esp32cammb.menu.FlashFreq.40.build.flash_freq=40m
+
+##############################################################
+
+</code>
+
 * 
 1.  xxxx
 2.  xxxx
