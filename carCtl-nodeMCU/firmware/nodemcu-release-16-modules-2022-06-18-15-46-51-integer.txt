@@ -1,1 +1,0 @@
-16 modules: bit, crypto, encoder, enduser_setup, file, gpio, net, node, pwm, rtctime, sjson, sntp, tmr, uart, websocket, wifi.
