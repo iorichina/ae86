@@ -114,8 +114,21 @@ public class Esp32CameraFragment extends Fragment {
         //#top_left,top_right,bottom_left,bottom_right
         StringBuilder sb = new StringBuilder("#");
         if (null == forward) {
-            sb.append(hex(0)).append(hex(0));
-            sb.append(hex(0)).append(hex(0));
+            //stop
+            if (null == left) {
+                sb.append(hex(0)).append(hex(0));
+                sb.append(hex(0)).append(hex(0));
+            }
+            //go left
+            else if (left) {
+                sb.append(hex(0)).append(hex(255));
+                sb.append(hex(255)).append(hex(0));
+            }
+            //go right
+            else {
+                sb.append(hex(255)).append(hex(0));
+                sb.append(hex(0)).append(hex(255));
+            }
         } else if (forward) {
             //go
             if (null == left) {
