@@ -66,7 +66,7 @@ git 仓库 clone 到安装目录
 
 ## 4、开发目录说明
 
-### （1） carCtl-nodeMCU
+[removed]### （1） carCtl-nodeMCU
 
 自制简单小车控制代码
 
